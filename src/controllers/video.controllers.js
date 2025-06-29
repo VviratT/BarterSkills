@@ -1,0 +1,151 @@
+import mongoose              from "mongoose";
+import { Video }             from "../models/video.model.js";
+import { ApiError }          from "../utils/ApiError.js";
+import { ApiResponse }       from "../utils/ApiResponse.js";
+import { asyncHandler }      from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
+const getAllVideos = asyncHandler(async (req, res) => {
+  let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+  page  = parseInt(page,  10);
+  limit = parseInt(limit, 10);
+  const skip = (page - 1) * limit;
+
+  const filter = {};
+  if (query) {
+    const regex = new RegExp(query, "i");
+    filter.$or = [{ title: regex }, { description: regex }, { tags: regex }];
+  }
+  if (userId) {
+    if (!mongoose.isValidObjectId(userId)) {
+      throw new ApiError(400, "Invalid user ID filter");
+    }
+    filter.owner = userId;
+  }
+
+  const sortField = sortBy || "createdAt";
+  const sortOrder = sortType === "asc" ? 1 : -1;
+
+  const videos = await Video.find(filter)
+    .sort({ [sortField]: sortOrder })
+    .skip(skip)
+    .limit(limit)
+    .populate("owner", "fullName avatarUrl");
+
+  res.json(new ApiResponse({ data: videos }));
+});
+
+const publishAVideo = asyncHandler(async (req, res) => {
+  const { title, description, tags } = req.body;
+  if (!title?.trim()) {
+    throw new ApiError(400, "Video title is required");
+  }
+  if (!req.file?.path) {
+    throw new ApiError(400, "Video file is required");
+  }
+
+  const uploadRes = await uploadOnCloudinary(req.file.path, "videos");
+  const video = await Video.create({
+    title:       title.trim(),
+    description: description?.trim() || "",
+    url:         uploadRes.secure_url,
+    publicId:    uploadRes.public_id,
+    owner:       req.user._id,
+    tags:        tags?.split(",").map(t => t.trim()).filter(Boolean) || []
+  });
+
+  res.status(201).json(new ApiResponse({
+    statusCode: 201,
+    message:    "Video published",
+    data:       video
+  }));
+});
+
+const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl");
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  res.json(new ApiResponse({ data: video }));
+});
+
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const { title, description, tags } = req.body;
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
+  if (!video.owner.equals(req.user._id)) throw new ApiError(403, "Not allowed");
+
+  if (title?.trim())       video.title       = title.trim();
+  if (description?.trim()) video.description = description.trim();
+  if (tags) {
+    video.tags = tags.split(",").map(t => t.trim()).filter(Boolean);
+  }
+
+  if (req.file?.path) {
+    await uploadOnCloudinary.destroy(video.publicId);
+    const uploadRes = await uploadOnCloudinary(req.file.path, "videos");
+    video.url      = uploadRes.secure_url;
+    video.publicId = uploadRes.public_id;
+  }
+
+  await video.save();
+  res.json(new ApiResponse({
+    message: "Video updated",
+    data:    video
+  }));
+});
+
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
+  if (!video.owner.equals(req.user._id)) throw new ApiError(403, "Not allowed");
+
+  await uploadOnCloudinary.destroy(video.publicId);
+  await video.remove();
+
+  res.json(new ApiResponse({ message: "Video deleted" }));
+});
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
+  if (!video.owner.equals(req.user._id)) throw new ApiError(403, "Not allowed");
+
+  video.isPublished = !video.isPublished;
+  await video.save();
+
+  res.json(new ApiResponse({
+    message: `Video ${video.isPublished ? "published" : "unpublished"}`,
+    data:    video
+  }));
+});
+
+export {
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus
+};
