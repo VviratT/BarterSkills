@@ -5,14 +5,14 @@ import { ApiResponse }  from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const createTweet = asyncHandler(async (req, res) => {
-  const { text } = req.body;
-  if (!text || !text.trim()) {
+  const { content } = req.body;
+  if (!content || !content.trim()) {
     throw new ApiError(400, "Tweet text is required");
   }
 
   const tweet = await Tweet.create({
-    text: text.trim(),
-    user: req.user._id
+    content: content.trim(),
+    owner: req.user._id
   });
 
   res.status(201).json(new ApiResponse({
@@ -28,19 +28,19 @@ const getUserTweets = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid user ID");
   }
 
-  const tweets = await Tweet.find({ user: userId })
+  const tweets = await Tweet.find({ owner: userId })
     .sort({ createdAt: -1 });
 
-  res.json(new ApiResponse({ data: tweets }));
+  res.status(200).json(new ApiResponse(200, tweets, "User tweets fetched"));
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
-  const { text }    = req.body;
+  const { content }    = req.body;
   if (!mongoose.isValidObjectId(tweetId)) {
     throw new ApiError(400, "Invalid tweet ID");
   }
-  if (!text || !text.trim()) {
+  if (!content || !content.trim()) {
     throw new ApiError(400, "Tweet text is required");
   }
 
@@ -48,14 +48,14 @@ const updateTweet = asyncHandler(async (req, res) => {
   if (!tweet) {
     throw new ApiError(404, "Tweet not found");
   }
-  if (!tweet.user.equals(req.user._id)) {
+  if (!tweet.owner.equals(req.user._id)) {
     throw new ApiError(403, "Not authorized to update this tweet");
   }
 
-  tweet.text = text.trim();
+  tweet.content = content.trim();
   await tweet.save();
 
-  res.json(new ApiResponse({ message: "Tweet updated", data: tweet }));
+  res.status(200).json(new ApiResponse({statusCode :200, message: "Tweet updated", data: tweet }));
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
@@ -66,11 +66,11 @@ const deleteTweet = asyncHandler(async (req, res) => {
 
   const tweet = await Tweet.findById(tweetId);
   if (!tweet) throw new ApiError(404, "Tweet not found");
-  if (!tweet.user.equals(req.user._id)) throw new ApiError(403, "Not allowed");
+  if (!tweet.owner.equals(req.user._id)) throw new ApiError(403, "Not allowed");
 
-  await tweet.remove();
+  await tweet.deleteOne();
 
-  res.json(new ApiResponse({ message: "Tweet deleted" }));
+  res.status(200).json(new ApiResponse({statusCode:200, message: "Tweet deleted" }));
 });
 
 export {

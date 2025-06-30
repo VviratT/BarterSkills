@@ -28,9 +28,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
   ]);
   const totalViews = viewsAgg[0]?.totalViews || 0;
 
-  res.json(new ApiResponse({
-    data: { totalSubscribers, totalVideos, totalLikes, totalViews }
-  }));
+  res.status(200).json(new ApiResponse({statusCode:200, data: { totalSubscribers, totalVideos, totalLikes, totalViews } }));
 });
 
 const getChannelVideos = asyncHandler(async (req, res) => {
@@ -43,7 +41,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .populate("owner", "fullName avatarUrl");
 
-  res.json(new ApiResponse({ data: videos }));
+  res.status(200).json(new ApiResponse({statusCode:200, data: videos }));
 });
 
 export {

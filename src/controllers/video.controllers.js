@@ -3,7 +3,10 @@ import { Video }             from "../models/video.model.js";
 import { ApiError }          from "../utils/ApiError.js";
 import { ApiResponse }       from "../utils/ApiResponse.js";
 import { asyncHandler }      from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
+import ffmpeg from "fluent-ffmpeg";
+import fs from "fs";
+import path from "path";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -35,23 +38,57 @@ const getAllVideos = asyncHandler(async (req, res) => {
   res.json(new ApiResponse({ data: videos }));
 });
 
+const getVideoDuration = (filePath) => {
+  return new Promise((resolve) => {
+    ffmpeg.ffprobe(filePath, (err, meta) => {
+      if (err) {
+        console.warn("ffprobe failed:", err.message);
+        return resolve(0);
+      }
+      resolve(meta?.format?.duration || 0);
+    });
+  });
+};
+
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description, tags } = req.body;
-  if (!title?.trim()) {
+  const { title = "", description = "" } = req.body;
+
+  if (!title.trim()) {
     throw new ApiError(400, "Video title is required");
   }
-  if (!req.file?.path) {
-    throw new ApiError(400, "Video file is required");
+
+  const videoFile = req.files?.videoFile?.[0];
+  const thumbFile = req.files?.thumbnail?.[0];
+  if (!videoFile || !thumbFile) {
+    throw new ApiError(400, "Both videoFile and thumbnail are required");
   }
 
-  const uploadRes = await uploadOnCloudinary(req.file.path, "videos");
+  const videoPath = path.resolve(videoFile.path);
+  const thumbPath = path.resolve(thumbFile.path);
+  console.log("Publishing video from:", videoPath);
+
+  if (!fs.existsSync(videoPath)) {
+    throw new ApiError(500, "Uploaded video missing on disk");
+  }
+  if (!fs.existsSync(thumbPath)) {
+    throw new ApiError(500, "Uploaded thumbnail missing on disk");
+  }
+
+  const uploadedVideo     = await uploadOnCloudinary(videoPath, "videos");
+  const uploadedThumbnail = await uploadOnCloudinary(thumbPath, "thumbnails");
+
+  const duration = await getVideoDuration(videoPath);
+
+  fs.unlink(videoPath,   () => {});
+  fs.unlink(thumbPath,   () => {});
+
   const video = await Video.create({
-    title:       title.trim(),
-    description: description?.trim() || "",
-    url:         uploadRes.secure_url,
-    publicId:    uploadRes.public_id,
-    owner:       req.user._id,
-    tags:        tags?.split(",").map(t => t.trim()).filter(Boolean) || []
+    videoFile: uploadedVideo.secure_url,
+    thumbnail: uploadedThumbnail.secure_url,
+    title:     title.trim(),
+    description: description.trim(),
+    duration,
+    owner:     req.user._id,
   });
 
   res.status(201).json(new ApiResponse({
@@ -60,6 +97,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     data:       video
   }));
 });
+
+
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
@@ -116,8 +155,11 @@ const deleteVideo = asyncHandler(async (req, res) => {
   if (!video) throw new ApiError(404, "Video not found");
   if (!video.owner.equals(req.user._id)) throw new ApiError(403, "Not allowed");
 
-  await uploadOnCloudinary.destroy(video.publicId);
-  await video.remove();
+  if (video.publicId) {
+    await deleteFromCloudinary(video.publicId);
+  }
+
+  await video.deleteOne();
 
   res.json(new ApiResponse({ message: "Video deleted" }));
 });

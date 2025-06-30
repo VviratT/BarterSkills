@@ -1,0 +1,1782 @@
+{
+	"info": {
+		"_postman_id": "5c976562-17e4-4f6b-8146-9e19a2915c23",
+		"name": "YoutubeDB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42830329"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "HealthCheck",
+					"item": [
+						{
+							"name": "HealthCheck",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => {\r",
+											"  pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Body has message OK\", () => {\r",
+											"  const json = pm.response.json();\r",
+											"  pm.expect(json.message).to.eql(\"Success\");\r",
+											"});\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/healthcheck",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"healthcheck"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "User Register",
+					"item": [
+						{
+							"name": "User Register",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));\r",
+											"\r",
+											"const body = pm.response.json();\r",
+											"\r",
+											"pm.test(\"Response has user ID\", () => \r",
+											"  pm.expect(body.data._id).to.be.a(\"string\")\r",
+											");\r",
+											"\r",
+											"// Save user ID\r",
+											"pm.environment.set(\"testUserId\", body.data._id);\r",
+											"\r",
+											"// (Optional) If you later need to use the avatar or username:\r",
+											"pm.environment.set(\"username\", body.data.username);\r",
+											"pm.environment.set(\"avatarUrl\", body.data.avatar);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "fullName",
+											"value": "collection tester",
+											"type": "text"
+										},
+										{
+											"key": "email",
+											"value": "collection13@test.com",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "collection_tester13",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "Test@1234",
+											"type": "text"
+										},
+										{
+											"key": "avatar",
+											"type": "file",
+											"src": "postman-cloud:///1f0550e9-5327-4360-98f0-5ba8a6810e46"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server}}/users/register",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+											"const body = pm.response.json();\r",
+											"pm.environment.set(\"accessToken\", body.data.accessToken);\r",
+											"pm.environment.set(\"refreshToken\", pm.cookies.get(\"refreshToken\"));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"username\":\"collection_tester13\",\r\n  \"password\": \"Test@1234\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server}}/users/login",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Current User",
+					"item": [
+						{
+							"name": "Current User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+											"const user = pm.response.json().data;\r",
+											"pm.expect(user.username).to.eql(pm.environment.get(\"username\"));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{accessToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/users/current-user",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"current-user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Change password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"oldPassword\": \"Test@1234\",\r\n  \"newPassword\": \"NewPass@1234\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server}}/users/change-password",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"change-password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Account Details",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+											"const updated = pm.response.json().data;\r",
+											"pm.expect(updated.fullName).to.eql(\"collection tester Updated\");\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"fullName\": \"collection tester Updated\",\r\n  \"email\": \"collection13@test.com\",\r\n  \"description\": \"Updated via Postman\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server}}/users/update-account",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"update-account"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Avatar",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "avatar",
+											"type": "file",
+											"src": "postman-cloud:///1f054ef1-0fbf-44f0-8e20-2c910902b9a9"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server}}/users/avatar",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"avatar"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Cover image",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "coverImage",
+											"type": "file",
+											"src": "postman-cloud:///1f054ef0-f94e-4ae0-9dac-031eb11fed47"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server}}/users/cover-image",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"cover-image"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Logout",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{accessToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/users/logout",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"logout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "User Login Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+											"const body = pm.response.json();\r",
+											"pm.environment.set(\"accessToken\", body.data.accessToken);\r",
+											"pm.environment.set(\"refreshToken\", pm.cookies.get(\"refreshToken\"));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"username\":\"collection_tester13\",\r\n  \"password\": \"NewPass@1234\"\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server}}/users/login",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "refresh token",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/users/refresh-token",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"refresh-token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Channel & History",
+					"item": [
+						{
+							"name": "Channel Profile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+											"const channel = pm.response.json().data;\r",
+											"pm.expect(channel.username).to.eql(pm.environment.get(\"username\"));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{accessToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/users/c/{{username}}",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"c",
+										"{{username}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Watch History",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{accessToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/users/history",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"users",
+										"history"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Video",
+			"item": [
+				{
+					"name": "Publish Video",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Video created (201)\", () => pm.response.to.have.status(201));\r",
+									"\r",
+									"const v = pm.response.json().statusCode.data;\r",
+									"\r",
+									"pm.test(\"Has _id\", () => pm.expect(v._id).to.be.a(\"string\"));\r",
+									"\r",
+									"// Save videoId for subsequent tests\r",
+									"pm.environment.set(\"testVideoId\", v._id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "videoFile",
+									"type": "file",
+									"src": "postman-cloud:///1f055cfe-7bf4-4ab0-a39c-b252c2fba8e0"
+								},
+								{
+									"key": "title",
+									"value": "\"collection Test Video\"",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "\"Uploaded vis Postman\"",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1f054ef1-0fbf-44f0-8e20-2c910902b9a9"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{server}}/videos",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Video by Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const v = pm.response.json().statusCode.data;\r",
+									"pm.test(\"ID matches\", () => pm.expect(v._id).to.eql(pm.environment.get(\"testVideoId\")));\r",
+									"pm.test(\"Has owner field\", () => pm.expect(v).to.have.property(\"owner\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/videos/{{testVideoId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos",
+								"{{testVideoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Video",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const v = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Title updated\", () => pm.expect(v.title).to.eql(\"collection Video Updated\"));\r",
+									"\r",
+									"pm.environment.set(\"testVideoId\", v._id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"collection Video Updated\",\r\n  \"description\": \"Updated via Postman\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/videos/{{testVideoId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos",
+								"{{testVideoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Publish",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const msg = pm.response.json().statusCode.message;\r",
+									"pm.test(\"Message mentions publish/unpublish\", () => {\r",
+									"  pm.expect(msg).to.match(/Video published|Video unpublished/);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/videos/toggle/publish/{{testVideoId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos",
+								"toggle",
+								"publish",
+								"{{testVideoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Video",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Deleted message\", () => {\r",
+									"  pm.expect(pm.response.json().message).to.eql(\"Success\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/videos/{{testVideoId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos",
+								"{{testVideoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Videos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+									"const arr = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Returns array\", () => pm.expect(arr).to.be.an(\"array\"));\r",
+									"if (arr.length) {\r",
+									"  pm.test(\"Video has expected fields\", () => {\r",
+									"    const v = arr[0];\r",
+									"    pm.expect(v).to.have.property(\"_id\");\r",
+									"    pm.expect(v).to.have.property(\"title\");\r",
+									"    pm.expect(v).to.have.property(\"videoFile\");\r",
+									"  });\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/videos?page=1&limit=10&query=&sortBy=createdAt&sortType=desc",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"videos"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "query",
+									"value": ""
+								},
+								{
+									"key": "sortBy",
+									"value": "createdAt"
+								},
+								{
+									"key": "sortType",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Get Comments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+									"const comments = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Comments is an array\", () => pm.expect(comments).to.be.an(\"array\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/comments/{{testVideoId}}?page=1&limit=5",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"comments",
+								"{{testVideoId}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Comments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 201\", () => pm.response.to.have.status(201));\r",
+									"const c = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Comment text matches\", () => pm.expect(c.content).to.eql(\"This is a collection test comment!\"));\r",
+									"pm.environment.set(\"commentId\", c._id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"content\": \"This is a collection test comment!\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/comments/{{testVideoId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"comments",
+								"{{testVideoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Video created (200)\", () => pm.response.to.have.status(200));\r",
+									"const json = pm.response.json();\r",
+									"const v = json.statusCode?.data || json.data;\r",
+									"pm.test(\"Has _id\", () => pm.expect(v._id).to.be.a(\"string\"));\r",
+									"pm.environment.set(\"testVideoId\", v._id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"content\": \"Updated via Postman\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/comments/c/{{commentId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"comments",
+								"c",
+								"{{commentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Response message\", () => {\r",
+									"  pm.expect(pm.response.json().statusCode.message).to.eql(\"Comment deleted\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/comments/c/{{commentId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"comments",
+								"c",
+								"{{commentId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Playlist",
+			"item": [
+				{
+					"name": "Create Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"201 Created\", () => pm.response.to.have.status(201));\r",
+									"const pl = pm.response.json().statusCode.data;\r",
+									"pm.environment.set(\"playlistId\", pl._id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"My Collection Test Playlist\",\r\n  \"description\": \"Created via Postman\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/playlist",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User's Playlists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const arr = pm.response.json().data || [];\r",
+									"pm.test(\"Returns array\", () => pm.expect(arr).to.be.an(\"array\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/playlist/user/{{testUserId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"user",
+								"{{testUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Playlist By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const pl = pm.response.json().statusCode.data;\r",
+									"pm.test(\"ID matches\", () => pm.expect(pl._id).to.eql(pm.environment.get(\"playlistId\")));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/playlist/{{playlistId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"{{playlistId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const pl = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Name updated\", () => pm.expect(pl.name).to.eql(\"Renamed Collection Playlist\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Renamed Collection Playlist\",\r\n  \"description\": \"Updated via Postman\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/playlist/{{playlistId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"{{playlistId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Video to Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const pl = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Video in playlist\", () => {\r",
+									"  pm.expect(pl.videos.map(v => v.toString())).to.include(pm.environment.get(\"testVideoId\"));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/playlist/add/{{testVideoId}}/{{playlistId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"add",
+								"{{testVideoId}}",
+								"{{playlistId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Video from Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"const pl = pm.response.json().statusCode.data;\r",
+									"pm.test(\"Video removed\", () => {\r",
+									"  pm.expect(pl.videos.map(v => v.toString())).to.not.include(pm.environment.get(\"testVideoId\"));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/playlist/remove/{{testVideoId}}/{{playlistId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"remove",
+								"{{testVideoId}}",
+								"{{playlistId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Playlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"200 OK\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"Deleted message\", () => {\r",
+									"  pm.expect(pm.response.json().message).to.eql(\"Success\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/playlist/{{playlistId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"playlist",
+								"{{playlistId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "Subscribe to Channel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode).to.eql(200));\r",
+									"pm.test(\"message indicates subscribe/unsubscribe\", () => {\r",
+									"  pm.expect(json.message).to.match(/Subscribed|Unsubscribed/);\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/subscriptions/c/{{testChannelId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"subscriptions",
+								"c",
+								"{{testChannelId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Subscriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"statusCode is 200\", () => {\r",
+									"  pm.expect(json.statusCode).to.eql(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"data is an array\", () => {\r",
+									"  pm.expect(json.data).to.be.an(\"array\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/subscriptions/c/{{testUserId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"subscriptions",
+								"c",
+								"{{testUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Channel’s Subscribers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode).to.eql(200));\r",
+									"pm.test(\"data is an array\", () => pm.expect(json.data).to.be.an(\"array\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/subscriptions/u/{{testChannelId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"subscriptions",
+								"u",
+								"{{testChannelId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tweets",
+			"item": [
+				{
+					"name": "Create Tweet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));\r",
+									"pm.test(\"statusCode is 201\", () => pm.expect(json.statusCode.statusCode).to.eql(201));\r",
+									"pm.test(\"message is Tweet created\", () =>\r",
+									"  pm.expect(json.statusCode.message).to.match(/Tweet created/));\r",
+									"pm.test(\"data._id exists\", () => pm.expect(json.statusCode.data._id).to.be.a(\"string\"));\r",
+									"// Save the tweet ID for later\r",
+									"pm.environment.set(\"testTweetId\", json.statusCode.data._id);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"content\": \"Hello Collection from Postman!\" }\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/tweets",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"tweets"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List My Tweets",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode).to.eql(200));\r",
+									"pm.test(\"data is array\", () => pm.expect(json.data).to.be.an(\"array\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/tweets/user/{{testChannelId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"tweets",
+								"user",
+								"{{testChannelId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tweet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode.statusCode).to.eql(200));\r",
+									"pm.test(\"message is Tweet deleted\", () =>\r",
+									"  pm.expect(json.statusCode.message).to.match(/Tweet deleted/));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{accessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/tweets/{{testTweetId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"tweets",
+								"{{testTweetId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Channel Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode.statusCode).to.eql(200));\r",
+									"pm.test(\"data has required keys\", () => {\r",
+									"  const keys = Object.keys(json.statusCode.data);\r",
+									"  pm.expect(keys).to.include.members([\r",
+									"    \"totalSubscribers\",\r",
+									"    \"totalVideos\",\r",
+									"    \"totalLikes\",\r",
+									"    \"totalViews\"\r",
+									"  ]);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/dashboard/stats/{{testChannelId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"dashboard",
+								"stats",
+								"{{testChannelId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Channel Videos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));\r",
+									"pm.test(\"statusCode is 200\", () => pm.expect(json.statusCode.statusCode).to.eql(200));\r",
+									"pm.test(\"data is array\", () => pm.expect(json.statusCode.data).to.be.an(\"array\"));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/dashboard/videos/{{testChannelId}}",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"dashboard",
+								"videos",
+								"{{testChannelId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
