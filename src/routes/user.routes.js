@@ -14,9 +14,56 @@ import {
 } from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-
+import passport from "passport";
+import { generateAccessAndRefereshTokens } from "../controllers/user.controller.js"; 
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = Router()
+
+router.get("/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/auth/google/failure", session: false }),
+  async (req, res) => {
+    try {
+      // 'req.user' is the Mongoose document returned by Passport
+      const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(req.user._id);
+
+      // Set cookies
+      const cookieOpts = { httpOnly: true, sameSite: "Lax", secure: false };
+      res.cookie("accessToken", accessToken, cookieOpts);
+      res.cookie("refreshToken", refreshToken, cookieOpts);
+
+      // Send response
+      return res.status(200).json({
+        success: true,
+        message: "Google login successful",
+        data: {
+          user: {
+            _id: req.user._id,
+            fullName: req.user.fullName,
+            email: req.user.email,
+            username: req.user.username,
+            avatar: req.user.avatar,
+          },
+          accessToken,
+          refreshToken
+        }
+      });
+    } catch (error) {
+      console.error("🚨 Google login callback failed:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Google login failed",
+        error: error.message || error
+      });
+    }
+  }
+);
 
 router.route("/register").post(
     upload.fields([

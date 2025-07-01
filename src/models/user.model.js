@@ -6,7 +6,9 @@ const userSchema = new Schema(
     {
         username: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.isGoogleUser;
+            },
             unique: true,
             lowercase: true,
             trim: true, 
@@ -21,7 +23,9 @@ const userSchema = new Schema(
         },
         fullName: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.isGoogleUser;
+            },
             trim: true, 
             index: true
         },
@@ -40,11 +44,26 @@ const userSchema = new Schema(
         ],
         password: {
             type: String,
-            required: [true, 'Password is required']
+            required: function () {
+                return !this.isGoogleUser;
+            },
         },
         refreshToken: {
             type: String
-        }
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
+        profilePicture: {
+            type: String,
+            default: "",
+        },
+        isGoogleUser: {
+            type: Boolean,
+            default: false
+        },
 
     },
     {

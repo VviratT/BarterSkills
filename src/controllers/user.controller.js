@@ -7,7 +7,33 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
 
-const generateAccessAndRefereshTokens = async(userId) =>{
+export const googleCallbackHandler = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const accessToken = generateAccessToken(user); 
+    const refreshToken = generateRefreshToken(user); 
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "Lax",
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Google Login Successful",
+      user,
+      accessToken,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Google login failed", error });
+  }
+};
+
+
+
+export const generateAccessAndRefereshTokens = async(userId) =>{
     try {
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
