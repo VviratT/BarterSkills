@@ -72,6 +72,10 @@ const userSchema = new Schema(
             type: Date,
             default: null
         },
+        credits: {
+            type: Number,
+            default: 5         
+        },
     },
     {
         timestamps: true

@@ -6,7 +6,6 @@ import { asyncHandler }      from "../utils/asyncHandler.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
-import path from "path";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -115,7 +114,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     videoFile: uploadedVideo.secure_url,
     thumbnail: uploadedThumb.secure_url,
     owner: req.user._id,
-    isPremium,
+    isPremium: duration > 90,
   });
 
   return res.status(201).json(
@@ -211,11 +210,53 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }));
 });
 
+const watchVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  const now = new Date();
+  const user = req.user;
+  const isUserPremium = user.isPremium && user.premiumExpiresAt > now;
+  if (!isUserPremium && video.isPremium) {
+    throw new ApiError(403, "Subscription required to watch this video");
+  }
+
+  let creditsBefore = user.credits || 0;
+  if (!video.isPremium) {
+    if (creditsBefore < 1) {
+      throw new ApiError(400, "Not enough credits. Earn or buy more to watch free videos.");
+    }
+    user.credits = creditsBefore - 1;
+    user.watchHistory = user.watchHistory || [];
+    user.watchHistory.push(video._id);
+    await user.save();
+  }
+
+  return res.json(
+    new ApiResponse({
+      data: {
+        videoUrl: video.videoFile,
+        remainingCredits: user.credits,
+      },
+      message: "Enjoy your video!"
+    })
+  );
+});
+
 export {
   getAllVideos,
   publishAVideo,
   getVideoById,
   updateVideo,
   deleteVideo,
-  togglePublishStatus
+  togglePublishStatus,
+  watchVideo,
 };
