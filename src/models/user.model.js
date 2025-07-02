@@ -64,7 +64,14 @@ const userSchema = new Schema(
             type: Boolean,
             default: false
         },
-
+        isPremium: {
+            type: Boolean,
+            default: false,
+        },
+        premiumExpiresAt: {
+            type: Date,
+            default: null
+        },
     },
     {
         timestamps: true

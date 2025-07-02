@@ -4,8 +4,8 @@ import { ApiError }          from "../utils/ApiError.js";
 import { ApiResponse }       from "../utils/ApiResponse.js";
 import { asyncHandler }      from "../utils/asyncHandler.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
-import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
+import ffmpeg from "fluent-ffmpeg";
 import path from "path";
 
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -38,14 +38,22 @@ const getAllVideos = asyncHandler(async (req, res) => {
   res.json(new ApiResponse({ data: videos }));
 });
 
-const getVideoDuration = (filePath) => {
-  return new Promise((resolve) => {
-    ffmpeg.ffprobe(filePath, (err, meta) => {
-      if (err) {
-        console.warn("ffprobe failed:", err.message);
-        return resolve(0);
-      }
-      resolve(meta?.format?.duration || 0);
+/**
+ * Get duration of a video file.
+ * @param {string} absPath - absolute path from multer (videoFile.path)
+ * @returns {Promise<number>}
+ */
+const getVideoDuration = (absPath) => {
+  return new Promise((resolve, reject) => {
+    console.log("→ Checking duration at:", absPath, "exists?", fs.existsSync(absPath));
+    if (!fs.existsSync(absPath)) {
+      return reject(new Error(`Video file not found at ${absPath}`));
+    }
+    ffmpeg.ffprobe(absPath, (err, metadata) => {
+      if (err) return reject(err);
+      const duration = metadata?.format?.duration;
+      if (!duration) return reject(new Error("No duration in metadata"));
+      resolve(duration);
     });
   });
 };
@@ -63,41 +71,61 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Both videoFile and thumbnail are required");
   }
 
-  const videoPath = path.resolve(videoFile.path);
-  const thumbPath = path.resolve(thumbFile.path);
+  const videoPath = videoFile.path;
+  const thumbPath = thumbFile.path;
   console.log("Publishing video from:", videoPath);
 
-  if (!fs.existsSync(videoPath)) {
-    throw new ApiError(500, "Uploaded video missing on disk");
-  }
-  if (!fs.existsSync(thumbPath)) {
-    throw new ApiError(500, "Uploaded thumbnail missing on disk");
-  }
-
-  const uploadedVideo     = await uploadOnCloudinary(videoPath, "videos");
-  const uploadedThumbnail = await uploadOnCloudinary(thumbPath, "thumbnails");
-
   const duration = await getVideoDuration(videoPath);
+  if (duration <= 0) {
+    throw new ApiError(400, "Invalid video duration");
+  }
 
-  fs.unlink(videoPath,   () => {});
-  fs.unlink(thumbPath,   () => {});
+  const now = new Date();
+  const isPremium = req.user.isPremium && req.user.premiumExpiresAt > now;
+  const maxFree = 90;
+  const maxPremium = 180;
+  const maxDuration = isPremium ? maxPremium : maxFree;
+  if (duration > maxDuration) {
+    throw new ApiError(
+      400,
+      `Video too long (${Math.round(duration)}s). Free users: ≤${maxFree}s, Premium: ≤${maxPremium}s.`
+    );
+  }
+
+  const uploadedVideo = await uploadOnCloudinary(videoPath, "videos");
+  if (!uploadedVideo?.secure_url) {
+    throw new ApiError(500, "Cloudinary video upload failed");
+  }
+
+  const uploadedThumb = await uploadOnCloudinary(thumbPath, "thumbnails");
+  if (!uploadedThumb?.secure_url) {
+    if (uploadedVideo.public_id) {
+      await deleteFromCloudinary(uploadedVideo.public_id);
+    }
+    throw new ApiError(500, "Cloudinary thumbnail upload failed");
+  }
+
+  fs.unlink(videoPath, () => {});
+  fs.unlink(thumbPath, () => {});
 
   const video = await Video.create({
-    videoFile: uploadedVideo.secure_url,
-    thumbnail: uploadedThumbnail.secure_url,
-    title:     title.trim(),
+    title: title.trim(),
     description: description.trim(),
     duration,
-    owner:     req.user._id,
+    videoFile: uploadedVideo.secure_url,
+    thumbnail: uploadedThumb.secure_url,
+    owner: req.user._id,
+    isPremium,
   });
 
-  res.status(201).json(new ApiResponse({
-    statusCode: 201,
-    message:    "Video published",
-    data:       video
-  }));
+  return res.status(201).json(
+    new ApiResponse({
+      statusCode: 201,
+      message: "Video published",
+      data: video,
+    })
+  );
 });
-
 
 
 const getVideoById = asyncHandler(async (req, res) => {

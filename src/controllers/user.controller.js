@@ -7,6 +7,36 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
 
+
+export const activatePremium = async (req, res) => {
+  const userId = req.user._id;
+  const days = req.body.days || 30;
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        isPremium: true,
+        premiumExpiry: expiresAt
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Premium activated until ${expiresAt.toISOString()}`,
+      data: {
+        isPremium: user.isPremium,
+        premiumExpiry: user.premiumExpiry
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to activate premium" });
+  }
+};
+
+
 export const googleCallbackHandler = async (req, res) => {
   try {
     const user = req.user;

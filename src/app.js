@@ -42,6 +42,8 @@ import likeRouter from "./routes/like.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 import oauthRoutes from "./routes/user.routes.js";
+import premiumRoutes from "./routes/premium.routes.js";
+import { schedulePremiumExpiryJob } from "./cron/premiumExpiryJob.js";
 
 //routes declaration
 app.use("/api/v1/healthcheck", healthcheckRouter)
@@ -54,7 +56,8 @@ app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/auth", oauthRoutes);
-
+app.use("/api/v1/premium", premiumRoutes);
+schedulePremiumExpiryJob();
 // http://localhost:8000/api/v1/users/register
 
 export { app }

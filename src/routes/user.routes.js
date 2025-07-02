@@ -18,8 +18,11 @@ import passport from "passport";
 import { generateAccessAndRefereshTokens } from "../controllers/user.controller.js"; 
 import dotenv from "dotenv";
 dotenv.config();
+import { activatePremium } from "../controllers/user.controller.js";
 
 const router = Router()
+
+router.post("/premium", verifyJWT, activatePremium);
 
 router.get("/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
