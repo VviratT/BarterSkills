@@ -62,5 +62,13 @@ app.use("/api/v1/billing", billingRoutes);
 schedulePremiumExpiryJob();
 // http://localhost:8000/api/v1/users/register
 
+app.use((err, _req, res, _next) => {
+  console.error(" Error caught:", err);
+  const status = err.statusCode || 500;
+  res.status(status).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
 
 export { app }
