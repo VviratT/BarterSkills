@@ -123,3 +123,8 @@ dist
 
 models/
 *.bin
+
+# Ignore environment config
+BarterSkillsBackend/.env
+.env
+.venv
