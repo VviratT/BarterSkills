@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
+import axios from "axios";
 
 
 cloudinary.config({ 
@@ -39,7 +40,22 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
+const downloadFile = async (url, destPath) => {
+  const writer = fs.createWriteStream(destPath);
+  const response = await axios({
+    url,
+    method: "GET",
+    responseType: "stream"
+  });
+  response.data.pipe(writer);
+  return new Promise((resolve, reject) => {
+    writer.on("finish", resolve);
+    writer.on("error", reject);
+  });
+};
 
 
 
-export {uploadOnCloudinary,deleteFromCloudinary}
+
+
+export {uploadOnCloudinary,deleteFromCloudinary,downloadFile}

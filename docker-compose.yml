@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  qg:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    ports:
+      - "8001:8001"
+
+  backend:
+    build: .
+    environment:
+      - QG_URL=http://qg:8001
+      # ...other envs
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qg

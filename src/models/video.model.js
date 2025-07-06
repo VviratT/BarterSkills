@@ -38,7 +38,20 @@ const videoSchema = new Schema(
         isPremium: {
             type: Boolean,
             default: false
-        }
+        },
+        transcript: {
+            type: String,
+            default: ""
+        },
+        summary: {
+            type: String,
+            default: ""
+        },
+        questions: [
+                {
+                    question: { type: String, required: true },
+                }
+        ],
 
     }, 
     {
@@ -48,4 +61,4 @@ const videoSchema = new Schema(
 
 videoSchema.plugin(mongooseAggregatePaginate)
 
-export const Video = mongoose.model("Video", videoSchema)
+export const Video = mongoose.models.Video || mongoose.model("Video", videoSchema);

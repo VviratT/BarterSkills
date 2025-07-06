@@ -6,6 +6,54 @@ import { asyncHandler }      from "../utils/asyncHandler.js";
 import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
+import path from "path";
+import { runLocalAI } from "../utils/runLocalAI.js";
+import { fetchQuestions } from "../utils/hfQG.js";
+
+
+const processVideoAI = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
+
+  const tempPath = path.resolve("public/temp", `${videoId}.mp4`);
+  const { transcript, summary } = await runLocalAI(video.videoFile, tempPath);
+
+  const rawQs = await fetchQuestions(summary);
+
+  const questions = [];
+  for (const qText of rawQs) {
+    questions.push({
+      question: qText
+    });
+  }
+
+  video.transcript = transcript;
+  video.summary    = summary;
+  video.questions  = questions;
+  await video.save();
+
+  res.status(200).json(
+    new ApiResponse(200, { transcript, summary, questions }, "AI + MCQs generated")
+  );
+});
+
+const getVideoAI = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const video = await Video.findById(videoId);
+
+  if (!video) throw new ApiError(404, "Video not found");
+
+  return res.status(200).json(
+  new ApiResponse(
+    200,
+    { transcript, summary, questions },
+    "AI data fetched successfully"
+  )
+);
+});
+
+
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -58,6 +106,11 @@ const getVideoDuration = (absPath) => {
 };
 
 const publishAVideo = asyncHandler(async (req, res) => {
+  
+  if (!req.user || !req.user._id) {
+    throw new ApiError(401, "Unauthorized: missing or invalid token");
+  }
+  
   const { title = "", description = "" } = req.body;
 
   if (!title.trim()) {
@@ -107,7 +160,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
   fs.unlink(videoPath, () => {});
   fs.unlink(thumbPath, () => {});
 
-  const video = await Video.create({
+  const newVideo = new Video({
     title: title.trim(),
     description: description.trim(),
     duration,
@@ -116,14 +169,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
     owner: req.user._id,
     isPremium: duration > 90,
   });
+  await newVideo.save();
+
 
   return res.status(201).json(
-    new ApiResponse({
-      statusCode: 201,
-      message: "Video published",
-      data: video,
-    })
+    new ApiResponse(201, newVideo, "Video published")
   );
+
 });
 
 
@@ -259,4 +311,6 @@ export {
   deleteVideo,
   togglePublishStatus,
   watchVideo,
+  getVideoAI,
+  processVideoAI,
 };
