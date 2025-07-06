@@ -75,3 +75,31 @@ connectDB()
   .catch((err) => {
     console.error("MONGO db connection failed:", err);
   });
+
+
+import fs from "fs";
+import { exec } from "child_process";
+
+// Whisper model auto-downloader
+const modelDir = path.resolve(__dirname, "../models");
+const modelPath = path.join(modelDir, "ggml-small.en.bin");
+const modelURL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin";
+
+function downloadWhisperModel() {
+  if (!fs.existsSync(modelPath)) {
+    console.log("🎯 Whisper model not found. Downloading...");
+    fs.mkdirSync(modelDir, { recursive: true });
+
+    exec(`curl -L -o "${modelPath}" "${modelURL}"`, (err, stdout, stderr) => {
+      if (err) {
+        console.error("❌ Whisper model download failed:", err.message);
+      } else {
+        console.log("✅ Whisper model downloaded successfully!");
+      }
+    });
+  } else {
+    console.log("📦 Whisper model already present. Skipping download.");
+  }
+}
+
+downloadWhisperModel();

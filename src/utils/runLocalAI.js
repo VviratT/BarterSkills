@@ -39,7 +39,6 @@ export async function runLocalAI(videoUrl, tempPath) {
   return { transcript, summary };
 }
 
-// 🔹 Summary from distilbart
 async function getT5Summary(transcript) {
   const model = "sshleifer/distilbart-cnn-12-6";
 
@@ -65,9 +64,7 @@ async function getT5Summary(transcript) {
 
     return summaryText;
   } catch (err) {
-    console.error("❌ HuggingFace summarization error:", err?.response?.data || err.message);
+    console.error("HuggingFace summarization error:", err?.response?.data || err.message);
     return "Summary generation failed.";
   }
 }
-
-const QG_MODEL   = "valhalla/t5-small-qg-prepend";

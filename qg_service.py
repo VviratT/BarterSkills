@@ -1,4 +1,3 @@
-# qg_service.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -19,9 +18,7 @@ async def generate_questions(req: QGRequest):
     if not text:
         raise HTTPException(400, detail="`summary` must be non-empty")
 
-    # count sentences very simply
     sent_count = max(1, text.count("."))
-    # ask for between 3 and 7 questions
     n_q = min(max(3, sent_count), 7)
 
     input_text = "generate questions: " + text
@@ -42,7 +39,6 @@ async def generate_questions(req: QGRequest):
        num_return_sequences=n_q
     )
 
-    # decode & dedupe
     qs = []
     for o in outputs:
       q = tokenizer.decode(o, skip_special_tokens=True).strip()
