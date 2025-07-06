@@ -2,6 +2,16 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import {User} from "../models/user.model.js";
 
+import path from 'path';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+console.log("🔍 Passport: GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+
+
 passport.use(
   new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
