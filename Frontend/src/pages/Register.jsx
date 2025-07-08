@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -10,7 +9,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
-import api from "../api/axios";
+import api from "../api/axios.js";
 import { AuthContext } from "../auth/AuthContext.jsx";
 
 export default function Register() {
@@ -26,8 +25,8 @@ export default function Register() {
   const mutation = useMutation(() => api.post("/users/register", form), {
     onSuccess: (res) => {
       const { accessToken, user } = res.data;
-      localStorage.setItem("accessToken", accessToken); // ✅ store token
-      setUser(user); // ✅ store user info
+      localStorage.setItem("accessToken", accessToken); 
+      setUser(user); 
       navigate("/dashboard");
     },
     onError: (err) => {

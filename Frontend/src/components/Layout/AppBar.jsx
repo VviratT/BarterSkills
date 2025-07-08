@@ -6,7 +6,7 @@ import {
   Button,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import useAuth from "../../hooks/useAuth.js";
+import useAuth from "../../auth/useAuth.js";
 
 export default function AppBar() {
   const { user, logout } = useAuth();

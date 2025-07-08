@@ -1,22 +1,40 @@
-// src/pages/Dashboard.jsx
 import React from "react";
-import { Container, Typography, Grid, Card, CardContent, Box } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Box,
+} from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "../api/axios.js";
 import { motion } from "framer-motion";
+import useAuth from "../auth/useAuth.js"; 
 
 export default function Dashboard() {
-  const channelId = /* get from user context, e.g. useAuth().user._id */;
+  const { user } = useAuth(); 
+  const channelId = user?._id; 
 
-  const { data: stats, isLoading: statsLoading } = useQuery(
-    ["dashboardStats", channelId],
-    () => axios.get(`/api/v1/dashboard/stats/${channelId}`).then((r) => r.data.data)
-  );
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["dashboardStats", channelId],
+    queryFn: () =>
+      axios
+        .get(`/api/v1/dashboard/stats/${channelId}`)
+        .then((r) => r.data.data),
+    enabled: !!channelId,
+  });
 
-  const { data: recent, isLoading: videosLoading } = useQuery(
-    ["dashboardVideos", channelId],
-    () => axios.get(`/api/v1/dashboard/videos/${channelId}`).then((r) => r.data.data)
-  );
+
+  const { data: recent, isLoading: videosLoading } = useQuery({
+    queryKey: ["dashboardVideos", channelId],
+    queryFn: () =>
+      axios
+        .get(`/api/v1/dashboard/videos/${channelId}`)
+        .then((r) => r.data.data),
+    enabled: !!channelId,
+  });
+
 
   if (statsLoading || videosLoading) {
     return <Typography>Loading dashboard…</Typography>;
@@ -24,7 +42,10 @@ export default function Dashboard() {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" mb={3}>Creator Dashboard</Typography>
+      <Typography variant="h4" mb={3}>
+        Creator Dashboard
+      </Typography>
+
       <Grid container spacing={3} mb={4}>
         {[
           { label: "Total Videos", value: stats.totalVideos },
@@ -35,7 +56,9 @@ export default function Dashboard() {
             <motion.div whileHover={{ scale: 1.03 }}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>{stat.label}</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    {stat.label}
+                  </Typography>
                   <Typography variant="h3">{stat.value}</Typography>
                 </CardContent>
               </Card>
@@ -44,7 +67,9 @@ export default function Dashboard() {
         ))}
       </Grid>
 
-      <Typography variant="h5" mb={2}>Your Recent Videos</Typography>
+      <Typography variant="h5" mb={2}>
+        Your Recent Videos
+      </Typography>
       <Grid container spacing={3}>
         {recent.map((v) => (
           <Grid item xs={12} sm={6} md={4} key={v._id}>

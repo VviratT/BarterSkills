@@ -1,4 +1,4 @@
-import client from "./client.js";
+import client from "./axios.js";
 
 export function login({ email, password }) {
   return client.post("/users/login", { email, password });

@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -19,31 +18,40 @@ export default function Home() {
   const [files, setFiles] = useState({ video: null, thumbnail: null });
   const [meta, setMeta] = useState({ title: "", description: "" });
 
-  // Fetch recent videos
-  const { data, isLoading } = useQuery(["videos"], () =>
-    axios.get("/api/v1/videos").then((res) => res.data.data)
-  );
 
-  // Mutation for upload
-  const uploadMutation = useMutation(
-    () => {
+  const {
+    data = [],
+    isPending,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["videos"],
+    queryFn: async () => {
+      const res = await axios.get("/api/v1/videos");
+      return res.data?.data ?? []; 
+    },
+  });
+
+
+  const uploadMutation = useMutation({
+    mutationFn: () => {
       const form = new FormData();
       form.append("videoFile", files.video);
       form.append("thumbnail", files.thumbnail);
       form.append("title", meta.title);
       form.append("description", meta.description);
+
       return axios.post("/api/v1/videos", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
-    {
-      onSuccess: () => {
-        setFiles({ video: null, thumbnail: null });
-        setMeta({ title: "", description: "" });
-        queryClient.invalidateQueries(["videos"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      setFiles({ video: null, thumbnail: null });
+      setMeta({ title: "", description: "" });
+
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+    },
+  });
 
   const handleFileChange = (e) => {
     setFiles((f) => ({ ...f, [e.target.name]: e.target.files[0] }));
@@ -113,8 +121,14 @@ export default function Home() {
       <Typography variant="h5" mb={2}>
         Recent Videos
       </Typography>
-      {isLoading ? (
+      {isPending ? (
         <Typography>Loading videos…</Typography>
+      ) : isError ? (
+        <Typography color="error">
+          Error loading videos: {error.message}
+        </Typography>
+      ) : data.length === 0 ? (
+        <Typography>No videos uploaded yet.</Typography>
       ) : (
         <Grid container spacing={3}>
           {data.map((v) => (

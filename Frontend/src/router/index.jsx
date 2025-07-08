@@ -1,44 +1,38 @@
-// src/router/index.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "../pages/Home.jsx";
-import Login from "../pages/Login.jsx";
-import Register from "../pages/Register.jsx";
+
+import Navbar from "../components/Navbar.jsx";
+import Footer from "../components/Footer.jsx";
+
+import Home      from "../pages/Home.jsx";
+import Login     from "../pages/Login.jsx";
+import Register  from "../pages/Register.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
-import Upload from "../pages/UploadVideo.jsx";
+import Upload    from "../pages/UploadVideo.jsx";
 import VideoPlayer from "../pages/VideoPlayer.jsx";
-import { useAuth } from "../hooks/useAuth.js"; // you’ll build this to read JWT
+import Profile     from "../pages/Profile.jsx";
 
-function Protected({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/login" />;
-}
+import ProtectedRoute from "../auth/ProtectedRoute.jsx";
 
-export default function AppRouter() {
+export default function Router() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/video/:id" element={<VideoPlayer />} />
-      <Route
-        path="/upload"
-        element={
-          <Protected>
-            <Upload />
-          </Protected>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <Protected>
-            <Dashboard />
-          </Protected>
-        }
-      />
-      {/* 404: */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload"    element={<Upload />} />
+          <Route path="/video/:id" element={<VideoPlayer />} />
+          <Route path="/profile/:username" element={<Profile />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Footer />
+    </>
   );
 }

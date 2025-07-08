@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -10,21 +9,21 @@ import {
   Alert,
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
-import api from "../api/axios"; // ✅ use our custom axios instance
+import api from "../api/axios.js"; 
 import { AuthContext } from "../auth/AuthContext.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext); // we only need to store user context here
+  const { setUser } = useContext(AuthContext); 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-  // React Query mutation for login
+
   const mutation = useMutation(() => api.post("/users/login", form), {
     onSuccess: (res) => {
       const { accessToken, user } = res.data;
-      localStorage.setItem("accessToken", accessToken); // ✅ store token
-      setUser(user); // ✅ store user info in context
+      localStorage.setItem("accessToken", accessToken); 
+      setUser(user); 
       navigate("/dashboard");
     },
     onError: (err) => {
