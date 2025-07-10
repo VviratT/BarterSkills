@@ -10,13 +10,13 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid video ID");
   }
 
-  const existing = await Like.findOne({ user: req.user._id, video: videoId });
+  const existing = await Like.findOne({ likedBy: req.user._id, video: videoId });
   if (existing) {
     await existing.remove();
     return res.json(new ApiResponse({ message: "Video unliked" }));
   }
 
-  const like = await Like.create({ user: req.user._id, video: videoId });
+  const like = await Like.create({ likedBy: req.user._id, video: videoId });
   res.json(new ApiResponse({
     message: "Video liked",
     data:    like
@@ -29,13 +29,13 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid comment ID");
   }
 
-  const existing = await Like.findOne({ user: req.user._id, comment: commentId });
+  const existing = await Like.findOne({ likedBy: req.user._id, comment: commentId });
   if (existing) {
     await existing.remove();
     return res.json(new ApiResponse({ message: "Comment unliked" }));
   }
 
-  const like = await Like.create({ user: req.user._id, comment: commentId });
+  const like = await Like.create({ likedBy: req.user._id, comment: commentId });
   res.json(new ApiResponse({
     message: "Comment liked",
     data:    like
@@ -48,13 +48,13 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid tweet ID");
   }
 
-  const existing = await Like.findOne({ user: req.user._id, tweet: tweetId });
+  const existing = await Like.findOne({ likedBy: req.user._id, tweet: tweetId });
   if (existing) {
     await existing.remove();
     return res.json(new ApiResponse({ message: "Tweet unliked" }));
   }
 
-  const like = await Like.create({ user: req.user._id, tweet: tweetId });
+  const like = await Like.create({ likedBy: req.user._id, tweet: tweetId });
   res.json(new ApiResponse({
     message: "Tweet liked",
     data:    like
@@ -62,8 +62,8 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  const likes = await Like.find({ user: req.user._id, video: { $exists: true } })
-    .populate("video", "title url owner");
+  const likes = await Like.find({ likedBy: req.user._id, video: { $exists: true } })
+    .populate("video", "title thumbnail owner");
   const videos = likes.map(l => l.video);
   res.json(new ApiResponse({ data: videos }));
 });

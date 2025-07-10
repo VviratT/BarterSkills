@@ -18,7 +18,7 @@ export const activatePremium = async (req, res) => {
       userId,
       {
         isPremium: true,
-        premiumExpiry: expiresAt
+        premiumExpiresAt: expiresAt
       },
       { new: true }
     );
@@ -28,7 +28,7 @@ export const activatePremium = async (req, res) => {
       message: `Premium activated until ${expiresAt.toISOString()}`,
       data: {
         isPremium: user.isPremium,
-        premiumExpiry: user.premiumExpiry
+        premiumExpiresAt: user.premiumExpiresAt
       }
     });
   } catch (error) {

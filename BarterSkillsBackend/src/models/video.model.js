@@ -23,6 +23,7 @@ const videoSchema = new Schema(
             type: Number, 
             required: true
         },
+        creditsGranted: { type: Number, default: 5 },
         views: {
             type: Number,
             default: 0

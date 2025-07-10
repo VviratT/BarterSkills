@@ -45,7 +45,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   }
 
   const subs = await Subscription.find({ channel: channelId })
-    .populate("user", "fullName avatarUrl");
+    .populate("subscriber", "fullName username avatar");
   res.json(new ApiResponse(200, subs.map(s => s.subscriber)));
 
 });
@@ -56,7 +56,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid subscriber ID");
   }
 
-  const subs = await Subscription.find({ user: subscriberId })
+  const subs = await Subscription.find({ subscriber: subscriberId })
     .populate("channel", "fullName username avatarUrl");
   res.json(new ApiResponse(200, subs.map(s => s.channel)));
 });

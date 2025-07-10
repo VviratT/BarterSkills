@@ -9,6 +9,8 @@ import ffmpeg from "fluent-ffmpeg";
 import path from "path";
 import { runLocalAI } from "../utils/runLocalAI.js";
 import { fetchQuestions } from "../utils/hfQG.js";
+import { User } from "../models/user.model.js";
+
 
 
 const processVideoAI = asyncHandler(async (req, res) => {
@@ -171,6 +173,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
   });
   await newVideo.save();
 
+  await User.findByIdAndUpdate(req.user._id, { $inc: { credits: 5 } });
 
   return res.status(201).json(
     new ApiResponse(201, newVideo, "Video published")
@@ -292,6 +295,9 @@ const watchVideo = asyncHandler(async (req, res) => {
     await user.save();
   }
 
+  video.views = (video.views || 0) + 1;
+  await video.save();
+  
   return res.json(
     new ApiResponse({
       data: {
