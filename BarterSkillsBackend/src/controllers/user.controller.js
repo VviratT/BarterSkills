@@ -46,7 +46,17 @@ export const googleCallbackHandler = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
+      path: "/" ,
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      path: "/" ,
       maxAge: 24 * 60 * 60 * 1000
     });
 
@@ -55,6 +65,7 @@ export const googleCallbackHandler = async (req, res) => {
       message: "Google Login Successful",
       user,
       accessToken,
+      refreshToken,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Google login failed", error });
@@ -145,6 +156,20 @@ const registerUser = asyncHandler( async (req, res) => {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
 
+    const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(createdUser._id);
+    const cookieOpts = {
+   httpOnly: true,
+   secure:   process.env.NODE_ENV === "production",
+   sameSite: "lax",
+   path:     "/",
+   maxAge:   30 * 24 * 60 * 60 * 1000
+ };
+ res
+   .cookie("accessToken",  accessToken,  cookieOpts)
+   .cookie("refreshToken", refreshToken, cookieOpts);
+
+
+
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User registered Successfully")
     )
@@ -192,7 +217,10 @@ const loginUser = asyncHandler(async (req, res) =>{
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", 
+        path: "/",
+        maxAge:  30 * 24 * 60 * 60 * 1000 
     }
 
     return res
@@ -216,7 +244,7 @@ const logoutUser = asyncHandler(async(req, res) => {
         req.user._id,
         {
             $unset: {
-                refreshToken: 1 // this removes the field from document
+                refreshToken: 1 
             }
         },
         {
@@ -226,7 +254,10 @@ const logoutUser = asyncHandler(async(req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure:  process.env.NODE_ENV === "production",
+        sameSite: "lax",  
+        path: "/",  
+        maxAge:  30 * 24 * 60 * 60 * 1000 
     }
 
     return res
@@ -260,24 +291,24 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             
         }
     
-        const options = {
-            httpOnly: true,
-            secure: true
-        }
-    
-        const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
-    
-        return res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", newRefreshToken, options)
-        .json(
-            new ApiResponse(
-                200, 
-                {accessToken, refreshToken: newRefreshToken},
-                "Access token refreshed"
-            )
-        )
+        const accessToken = user.generateAccessToken()
+         const options = {
+             httpOnly: true,
+             secure: process.env.NODE_ENV === "production",
+             sameSite: "lax",
+             path: "/"
+         }
+         return res
+             .status(200)
+             .cookie("accessToken", accessToken, options)
+             .cookie("refreshToken", incomingRefreshToken, options)
+             .json(
+                 new ApiResponse(
+                     200,
+                     { accessToken, refreshToken: incomingRefreshToken },
+                     "Access token refreshed"
+                 )
+             )
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token")
     }

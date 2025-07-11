@@ -8,57 +8,47 @@ import {
   Box,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import axios from "../api/axios.js";
+import api from "../api/api.js";
 import { motion } from "framer-motion";
-import useAuth from "../auth/useAuth.js"; 
+import useAuth from "../auth/useAuth.js";
 
 export default function Dashboard() {
-  const { user } = useAuth(); 
-  const channelId = user?._id; 
+  const { user } = useAuth();
+  const channelId = user?._id;
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats = {}, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboardStats", channelId],
     queryFn: () =>
-      axios
-        .get(`/api/v1/dashboard/stats/${channelId}`)
-        .then((r) => r.data.data),
+      api.get(`/dashboard/stats/${channelId}`).then((r) => r.data.data ?? {}),
     enabled: !!channelId,
   });
 
-
-  const { data: recent, isLoading: videosLoading } = useQuery({
+  const { data: recent = [], isLoading: videosLoading } = useQuery({
     queryKey: ["dashboardVideos", channelId],
     queryFn: () =>
-      axios
-        .get(`/api/v1/dashboard/videos/${channelId}`)
-        .then((r) => r.data.data),
+      api.get(`/dashboard/videos/${channelId}`).then((r) => r.data.data ?? []),
     enabled: !!channelId,
   });
 
-
-  if (statsLoading || videosLoading) {
+  if (statsLoading || videosLoading)
     return <Typography>Loading dashboard…</Typography>;
-  }
 
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" mb={3}>
         Creator Dashboard
       </Typography>
-
       <Grid container spacing={3} mb={4}>
         {[
-          { label: "Total Videos", value: stats.totalVideos },
-          { label: "Total Views", value: stats.totalViews },
-          { label: "Subscribers", value: stats.subscribersCount },
+          { label: "Total Videos", value: stats.totalVideos ?? 0 },
+          { label: "Total Views", value: stats.totalViews ?? 0 },
+          { label: "Subscribers", value: stats.subscribersCount ?? 0 },
         ].map((stat) => (
           <Grid item xs={12} sm={4} key={stat.label}>
             <motion.div whileHover={{ scale: 1.03 }}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {stat.label}
-                  </Typography>
+                  <Typography variant="h6">{stat.label}</Typography>
                   <Typography variant="h3">{stat.value}</Typography>
                 </CardContent>
               </Card>
@@ -66,7 +56,6 @@ export default function Dashboard() {
           </Grid>
         ))}
       </Grid>
-
       <Typography variant="h5" mb={2}>
         Your Recent Videos
       </Typography>
@@ -77,7 +66,7 @@ export default function Dashboard() {
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1">{v.title}</Typography>
-                  <Typography variant="body2" color="text.secondary" noWrap>
+                  <Typography variant="body2" noWrap>
                     {v.description}
                   </Typography>
                   <Box mt={1}>

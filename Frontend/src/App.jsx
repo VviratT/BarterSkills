@@ -1,6 +1,6 @@
 import React from "react";
-import Router from "./router/index.jsx";
+import AppRouter from "./router/index";
 
 export default function App() {
-  return <Router />;
+  return <AppRouter />;
 }

@@ -8,7 +8,7 @@ import Home      from "../pages/Home.jsx";
 import Login     from "../pages/Login.jsx";
 import Register  from "../pages/Register.jsx";
 import Dashboard from "../pages/Dashboard.jsx";
-import Upload    from "../pages/UploadVideo.jsx";
+import Upload    from "../pages/Upload.jsx";
 import VideoPlayer from "../pages/VideoPlayer.jsx";
 import Profile     from "../pages/Profile.jsx";
 
@@ -25,12 +25,12 @@ export default function Router() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/upload"    element={<Upload />} />
+          <Route path="/upload" element={<Upload />} />
           <Route path="/video/:id" element={<VideoPlayer />} />
           <Route path="/profile/:username" element={<Profile />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
       <Footer />
     </>

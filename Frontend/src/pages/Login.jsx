@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext.jsx";
 import {
   Box,
   TextField,
@@ -8,36 +9,22 @@ import {
   Container,
   Alert,
 } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
-import api from "../api/axios.js"; 
-import { AuthContext } from "../auth/AuthContext.jsx";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-
-  const mutation = useMutation(() => api.post("/users/login", form), {
-    onSuccess: (res) => {
-      const { accessToken, user } = res.data;
-      localStorage.setItem("accessToken", accessToken); 
-      setUser(user); 
-      navigate("/dashboard");
-    },
-    onError: (err) => {
-      setError(err.response?.data?.message || "Login failed");
-    },
-  });
-
-  const handleChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    mutation.mutate();
+    try {
+      await login(form);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -53,7 +40,7 @@ export default function Login() {
             name="email"
             label="Email"
             value={form.email}
-            onChange={handleChange}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             margin="normal"
             required
           />
@@ -63,18 +50,14 @@ export default function Login() {
             label="Password"
             type="password"
             value={form.password}
-            onChange={handleChange}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, password: e.target.value }))
+            }
             margin="normal"
             required
           />
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2 }}
-            disabled={mutation.isLoading}
-          >
-            {mutation.isLoading ? "Logging in…" : "Log In"}
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+            Log In
           </Button>
         </form>
         <Box mt={2}>

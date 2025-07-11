@@ -1,5 +1,13 @@
-import client from "./client";
-export const fetchVideos = () => client.get("/videos").then(r => r.data);
-export const uploadVideo = formData => client.post("/videos", formData);
-export const fetchVideoAI = videoId => client.get(`/videos/${videoId}/ai`);
-export const processVideoAI = videoId => client.post(`/videos/${videoId}/process-ai`);
+import api from "./api.js";
+
+export const uploadVideo = data =>
+  api.post("/videos", data, { headers: { "Content-Type": "multipart/form-data" } });
+
+export const getVideo = id =>
+  api.get(`/videos/${id}`);
+
+export const watchVideo = id =>
+  api.get(`/videos/watch/${id}`);
+
+export const listVideos = params =>
+  api.get("/videos", { params });

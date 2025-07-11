@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser"
 import passport from "passport";
 import session from "express-session";
 import "./config/passport.js";
-import axios from "axios";
 
 const app = express()
 
@@ -42,7 +41,6 @@ import commentRouter from "./routes/comment.routes.js"
 import likeRouter from "./routes/like.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
-import oauthRoutes from "./routes/user.routes.js";
 import premiumRoutes from "./routes/premium.routes.js";
 import { schedulePremiumExpiryJob } from "./cron/premiumExpiryJob.js";
 import billingRoutes from "./routes/billing.routes.js";
@@ -59,7 +57,6 @@ app.use("/api/v1/comments", commentRouter)
 app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
-app.use("/auth", oauthRoutes);
 app.use("/api/v1/premium", premiumRoutes);
 app.use("/api/v1/billing", billingRoutes);
 app.use("/api/v1/messages", messageRoutes);

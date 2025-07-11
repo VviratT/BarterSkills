@@ -22,7 +22,22 @@ import { activatePremium } from "../controllers/user.controller.js";
 
 const router = Router()
 
-router.post("/premium", verifyJWT, activatePremium);
+router.route("/register").post(
+    upload.fields([
+        {
+            name: "avatar",
+            maxCount: 1
+        }, 
+        {
+            name: "coverImage",
+            maxCount: 1
+        }
+    ]),
+    registerUser
+    )
+
+router.route("/login").post(loginUser)
+
 
 router.get("/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -68,21 +83,6 @@ router.get(
   }
 );
 
-router.route("/register").post(
-    upload.fields([
-        {
-            name: "avatar",
-            maxCount: 1
-        }, 
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
-    ]),
-    registerUser
-    )
-
-router.route("/login").post(loginUser)
 
 //secured routes
 router.route("/logout").post(verifyJWT,  logoutUser)
@@ -96,5 +96,8 @@ router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"), updat
 
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile)
 router.route("/history").get(verifyJWT, getWatchHistory)
+
+router.post("/premium", verifyJWT, activatePremium);
+
 
 export default router

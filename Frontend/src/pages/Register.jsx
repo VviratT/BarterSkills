@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext.jsx";
 import {
   Box,
   TextField,
@@ -8,39 +9,32 @@ import {
   Container,
   Alert,
 } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
-import api from "../api/axios.js";
-import { AuthContext } from "../auth/AuthContext.jsx";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
   const [form, setForm] = useState({
-    name: "",
+    fullName: "",
+    username: "",
     email: "",
     password: "",
   });
+  const [avatarFile, setAvatarFile] = useState(null);
   const [error, setError] = useState("");
 
-  const mutation = useMutation(() => api.post("/users/register", form), {
-    onSuccess: (res) => {
-      const { accessToken, user } = res.data;
-      localStorage.setItem("accessToken", accessToken); 
-      setUser(user); 
-      navigate("/dashboard");
-    },
-    onError: (err) => {
-      setError(err.response?.data?.message || "Registration failed");
-    },
-  });
-
-  const handleChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!avatarFile) return setError("Please upload an avatar");
     setError("");
-    mutation.mutate();
+    const data = new FormData();
+    Object.entries(form).forEach(([k, v]) => data.append(k, v));
+    data.append("avatar", avatarFile);
+    try {
+      await register(data);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
   };
 
   return (
@@ -53,10 +47,23 @@ export default function Register() {
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            name="name"
+            name="fullName"
             label="Full Name"
-            value={form.name}
-            onChange={handleChange}
+            value={form.fullName}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, fullName: e.target.value }))
+            }
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            name="username"
+            label="Username"
+            value={form.username}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, username: e.target.value }))
+            }
             margin="normal"
             required
           />
@@ -65,7 +72,7 @@ export default function Register() {
             name="email"
             label="Email"
             value={form.email}
-            onChange={handleChange}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             margin="normal"
             required
           />
@@ -75,23 +82,36 @@ export default function Register() {
             label="Password"
             type="password"
             value={form.password}
-            onChange={handleChange}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, password: e.target.value }))
+            }
             margin="normal"
             required
           />
           <Button
-            type="submit"
             variant="contained"
+            component="label"
             fullWidth
             sx={{ mt: 2 }}
-            disabled={mutation.isLoading}
           >
-            {mutation.isLoading ? "Registering…" : "Register"}
+            Upload Avatar
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => setAvatarFile(e.target.files[0])}
+            />
+          </Button>
+          {avatarFile && (
+            <Typography variant="caption">{avatarFile.name}</Typography>
+          )}
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
+            Register
           </Button>
         </form>
         <Box mt={2}>
           <Typography variant="body2">
-            Already have an account? <Link to="/login">Login</Link>
+            Already have an account? <Link to="/login">Log in</Link>
           </Typography>
         </Box>
       </Box>

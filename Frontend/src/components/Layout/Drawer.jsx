@@ -14,6 +14,7 @@ const navItems = [
   { text: "Dashboard", to: "/dashboard" },
   { text: "Chat", to: "/chat" },
   { text: "Payments", to: "/payments" },
+  { text: "Upload", to: "/upload" },
 ];
 
 export default function Drawer() {

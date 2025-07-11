@@ -7,8 +7,9 @@ import {
   Avatar,
   Box,
 } from "@mui/material";
-import { AuthContext } from "../auth/AuthContext.jsx";
+import { AuthContext } from "../context/AuthContext.jsx";
 import { useNavigate, Link } from "react-router-dom";
+
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -38,6 +39,13 @@ export default function Navbar() {
           <>
             <Button color="inherit" component={Link} to="/dashboard">
               Dashboard
+            </Button>
+            <Button
+              component={Link}
+              to="/upload"
+              color="inherit"
+            >
+              Upload Video
             </Button>
             <Avatar
               src={user.avatar}

@@ -10,7 +10,6 @@ export default function OAuthHandler() {
   useEffect(() => {
     (async () => {
       try {
-        // backend redirects here with cookies and maybe query tokens
         const { data } = await api.get("/users/auth/google/callback");
         localStorage.setItem("accessToken", data.accessToken);
         setUser(data.user);
