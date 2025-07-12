@@ -37,14 +37,13 @@ export default function Navbar() {
 
         {user ? (
           <>
+            <Button color="inherit" component={Link} to="/">
+              Home
+            </Button>
             <Button color="inherit" component={Link} to="/dashboard">
               Dashboard
             </Button>
-            <Button
-              component={Link}
-              to="/upload"
-              color="inherit"
-            >
+            <Button component={Link} to="/upload" color="inherit">
               Upload Video
             </Button>
             <Avatar

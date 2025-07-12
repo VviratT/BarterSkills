@@ -56,8 +56,7 @@ const getVideoAI = asyncHandler(async (req, res) => {
 });
 
 
-
-const getAllVideos = asyncHandler(async (req, res) => {
+ const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   page  = parseInt(page,  10);
   limit = parseInt(limit, 10);
@@ -84,7 +83,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
     .limit(limit)
     .populate("owner", "fullName avatarUrl");
 
-  res.json(new ApiResponse({ data: videos }));
+  return res.status(200).json({
+    success: true,
+    message: "Videos fetched successfully",
+    data: videos
+  });
 });
 
 /**
@@ -189,11 +192,13 @@ const getVideoById = asyncHandler(async (req, res) => {
   }
 
   const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl");
-  if (!video) {
-    throw new ApiError(404, "Video not found");
-  }
+  if (!video) throw new ApiError(404, "Video not found");
 
-  res.json(new ApiResponse({ data: video }));
+  return res.status(200).json({
+    success: true,
+    message: "Video fetched successfully",
+    data: video
+  });
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

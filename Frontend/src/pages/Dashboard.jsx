@@ -3,6 +3,7 @@ import {
   Container,
   Typography,
   Grid,
+  CardMedia ,
   Card,
   CardContent,
   Box,
@@ -11,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "../api/api.js";
 import { motion } from "framer-motion";
 import useAuth from "../auth/useAuth.js";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -19,14 +21,14 @@ export default function Dashboard() {
   const { data: stats = {}, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboardStats", channelId],
     queryFn: () =>
-      api.get(`/dashboard/stats/${channelId}`).then((r) => r.data.data ?? {}),
+      api.get(`/dashboard/stats`).then((r) => r.data.data ?? {}),
     enabled: !!channelId,
   });
 
   const { data: recent = [], isLoading: videosLoading } = useQuery({
     queryKey: ["dashboardVideos", channelId],
     queryFn: () =>
-      api.get(`/dashboard/videos/${channelId}`).then((r) => r.data.data ?? []),
+      api.get(`/dashboard/videos`).then((r) => r.data.data ?? []),
     enabled: !!channelId,
   });
 
@@ -78,6 +80,30 @@ export default function Dashboard() {
           </Grid>
         ))}
       </Grid>
+      {recent.map((video) => (
+        <Link
+          key={video._id}
+          to={`/watch/${video._id}`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Card>
+            <CardMedia
+              component="img"
+              height="180"
+              image={video.thumbnail}
+              alt={video.title}
+            />
+            <CardContent>
+              <Typography variant="h6" noWrap>
+                {video.title}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {video.owner.fullName}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Link>
+      ))}
     </Container>
   );
 }

@@ -11,6 +11,7 @@ import Dashboard from "../pages/Dashboard.jsx";
 import Upload    from "../pages/Upload.jsx";
 import VideoPlayer from "../pages/VideoPlayer.jsx";
 import Profile     from "../pages/Profile.jsx";
+import WatchPage from "../pages/WatchPage";
 
 import ProtectedRoute from "../auth/ProtectedRoute.jsx";
 
@@ -24,6 +25,7 @@ export default function Router() {
         <Route path="/register" element={<Register />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/watch/:videoId" element={<WatchPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/video/:id" element={<VideoPlayer />} />

@@ -11,3 +11,14 @@ export const watchVideo = id =>
 
 export const listVideos = params =>
   api.get("/videos", { params });
+
+export const getRecommendedVideos = async ({ excludeId }) => {
+  const res = await axios.get(`/videos`, {
+    params: {
+      limit: 10,
+      sortBy: "views",
+    },
+  });
+  return res.data.data.filter((v) => v._id !== excludeId);
+};
+

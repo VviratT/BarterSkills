@@ -1,22 +1,31 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as commentApi from "../api/comment";
-import * as likeApi from "../api/like";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "../utils/axios";
 
-export function useComments(videoId, page) {
-  return useQuery(["comments", videoId, page], () =>
-    commentApi.fetchComments(videoId, { page }).then(r => r.data.data)
-  );
-}
-export function usePostComment(videoId) {
-  const qc = useQueryClient();
-  return useMutation(content => commentApi.postComment(videoId, content), {
-    onSuccess: () => qc.invalidateQueries(["comments", videoId])
-  });
-}
+export const useComments = (videoId) => {
+  const queryClient = useQueryClient();
 
-export function useToggleLike(videoId) {
-  const qc = useQueryClient();
-  return useMutation(() => likeApi.toggleLikeVideo(videoId), {
-    onSuccess: () => qc.invalidateQueries(["video", videoId])
+  const fetchComments = async ({ pageParam = 1 }) => {
+    const res = await axios.get(`/comments/${videoId}?page=${pageParam}`);
+    return res.data.data;
+  };
+
+  const addComment = useMutation({
+    mutationFn: (content) =>
+      axios.post(`/comments/${videoId}`, { content }),
+    onSuccess: () => queryClient.invalidateQueries(["comments", videoId])
   });
-}
+
+  const updateComment = useMutation({
+    mutationFn: ({ commentId, content }) =>
+      axios.patch(`/comments/c/${commentId}`, { content }),
+    onSuccess: () => queryClient.invalidateQueries(["comments", videoId])
+  });
+
+  const deleteComment = useMutation({
+    mutationFn: (commentId) =>
+      axios.delete(`/comments/c/${commentId}`),
+    onSuccess: () => queryClient.invalidateQueries(["comments", videoId])
+  });
+
+  return { fetchComments, addComment, updateComment, deleteComment };
+};

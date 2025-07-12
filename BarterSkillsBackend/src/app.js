@@ -45,6 +45,7 @@ import premiumRoutes from "./routes/premium.routes.js";
 import { schedulePremiumExpiryJob } from "./cron/premiumExpiryJob.js";
 import billingRoutes from "./routes/billing.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 
 //routes declaration
@@ -60,6 +61,8 @@ app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/api/v1/premium", premiumRoutes);
 app.use("/api/v1/billing", billingRoutes);
 app.use("/api/v1/messages", messageRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
+
 schedulePremiumExpiryJob();
 // http://localhost:8000/api/v1/users/register
 
