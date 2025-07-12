@@ -3,43 +3,38 @@ import { Like }            from "../models/like.model.js";
 import { ApiError }        from "../utils/ApiError.js";
 import { ApiResponse }     from "../utils/ApiResponse.js";
 import { asyncHandler }    from "../utils/asyncHandler.js";
+import mongoose from "mongoose";
+import { Video } from "../models/video.model.js";
 
-const toggleVideoLike = asyncHandler(async (req, res) => {
+ const toggleVideoLike = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "Invalid video ID");
-  }
+  const userId = req.user._id;
 
-  const existing = await Like.findOne({ likedBy: req.user._id, video: videoId });
-  if (existing) {
-    await existing.remove();
-    return res.json(new ApiResponse({ message: "Video unliked" }));
-  }
+  if (!mongoose.isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
 
-  const like = await Like.create({ likedBy: req.user._id, video: videoId });
-  res.json(new ApiResponse({
-    message: "Video liked",
-    data:    like
-  }));
+  const existing = await Like.findOne({ video: videoId, likedBy: userId });
+  const liked = !existing;
+  if (existing) await existing.deleteOne();
+  else await Like.create({ video: videoId, likedBy: userId });
+
+  res.json(new ApiResponse(200, { liked }, liked ? "Video liked" : "Like removed"));
 });
+
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
-  if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "Invalid comment ID");
-  }
+  const userId = req.user._id;
 
-  const existing = await Like.findOne({ likedBy: req.user._id, comment: commentId });
+  if (!mongoose.isValidObjectId(commentId)) throw new ApiError(400, "Invalid comment ID");
+  const existing = await Like.findOne({ comment: commentId, likedBy: userId });
   if (existing) {
-    await existing.remove();
-    return res.json(new ApiResponse({ message: "Comment unliked" }));
+    await existing.deleteOne();
+    return res.json(new ApiResponse(200, null, "Comment unliked"));
   }
-
-  const like = await Like.create({ likedBy: req.user._id, comment: commentId });
-  res.json(new ApiResponse({
-    message: "Comment liked",
-    data:    like
-  }));
+  await Like.create({ comment: commentId, likedBy: userId });
+  res.json(new ApiResponse(200, null, "Comment liked"));
 });
 
 const toggleTweetLike = asyncHandler(async (req, res) => {

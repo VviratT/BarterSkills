@@ -1,33 +1,31 @@
-import { Box, Button, TextField } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Box, TextField, Button } from "@mui/material";
 
-const CommentEditor = ({ onSubmit, loading, initialValue = "" }) => {
+export default function CommentEditor({
+  onSubmit,
+  loading,
+  initialValue = "",
+}) {
   const [content, setContent] = useState(initialValue);
-
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box mb={2}>
       <TextField
         fullWidth
         multiline
         minRows={2}
-        maxRows={5}
-        label="Write a comment..."
+        label="Write a comment…"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         disabled={loading}
       />
       <Button
         variant="contained"
-        onClick={() => {
-          if (content.trim()) onSubmit(content);
-        }}
-        disabled={loading}
         sx={{ mt: 1 }}
+        disabled={loading}
+        onClick={() => content.trim() && onSubmit(content)}
       >
         {initialValue ? "Update" : "Post"}
       </Button>
     </Box>
   );
-};
-
-export default CommentEditor;
+}

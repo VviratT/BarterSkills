@@ -1,66 +1,74 @@
+import React, { useState } from "react";
 import { Box, CircularProgress, Button } from "@mui/material";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import CommentItem from "./CommentItem";
-import useAuth from "../../auth/useAuth";
-import axios from "../../api/api";
-import { useState } from "react";
 import CommentEditor from "./CommentEditor";
+import useAuth from "../../auth/useAuth.js";
+import api from "../../api/api.js";
 
-const CommentList = ({ videoId }) => {
+export default function CommentList({ videoId }) {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const [editing, setEditing] = useState(null);
 
-  const { data, fetchNextPage, hasNextPage, isLoading, refetch } =
-    useInfiniteQuery({
-      queryKey: ["comments", videoId],
-      queryFn: async ({ pageParam = 1 }) => {
-        const res = await axios.get(`/comments/${videoId}?page=${pageParam}`);
-        return res.data.data;
-      },
-      getNextPageParam: (_, pages) => pages.length + 1,
-    });
+  // fetch pages of comments
+  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
+    queryKey: ["comments", videoId],
+    queryFn: ({ pageParam = 1 }) =>
+      api
+        .get(`/comments/${videoId}?page=${pageParam}`)
+        .then((r) => r.data.data),
+    getNextPageParam: (_last, pages) => pages.length + 1,
+  });
 
   const allComments = data?.pages?.flat() || [];
 
-  const handleEdit = (comment) => setEditing(comment);
+  // create/update comment
+  const saveComment = useMutation({
+    mutationFn: ({ id, content }) =>
+      id
+        ? api.patch(`/comments/c/${id}`, { content })
+        : api.post(`/comments/${videoId}`, { content }),
+    onSuccess: () => {
+      qc.invalidateQueries(["comments", videoId]);
+      setEditing(null);
+    },
+  });
 
-  const handleDelete = async (commentId) => {
-    await axios.delete(`/comments/c/${commentId}`);
-    refetch();
+  // delete comment
+  const deleteComment = async (commentId) => {
+    await api.delete(`/comments/c/${commentId}`);
+    qc.invalidateQueries(["comments", videoId]);
   };
 
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
   return (
-    <Box mt={4}>
+    <Box mt={2}>
       <CommentEditor
         key={editing?._id || "new"}
         initialValue={editing?.content || ""}
-        onSubmit={async (text) => {
-          if (editing) {
-            await axios.patch(`/comments/c/${editing._id}`, { content: text });
-            setEditing(null);
-          } else {
-            await axios.post(`/comments/${videoId}`, { content: text });
-          }
-          refetch();
+        loading={saveComment.isLoading}
+        onSubmit={(text) => {
+          saveComment.mutate({ id: editing?._id, content: text });
         }}
       />
 
-      {isLoading ? (
-        <CircularProgress />
-      ) : (
-        allComments?.map(
-          (c) =>
-            c && (
-              <CommentItem
-                key={c._id}
-                comment={c}
-                isOwner={c?.owner?._id === user?._id}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            )
-        )
-      )}
+      {allComments.map((c) => (
+        <CommentItem
+          key={c._id}
+          comment={c}
+          isOwner={c.owner._id === user._id}
+          onEdit={() => setEditing(c)}
+          onDelete={() => deleteComment(c._id)}
+        />
+      ))}
 
       {hasNextPage && (
         <Box textAlign="center" mt={2}>
@@ -69,6 +77,4 @@ const CommentList = ({ videoId }) => {
       )}
     </Box>
   );
-};
-
-export default CommentList;
+}

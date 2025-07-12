@@ -10,6 +10,24 @@ import path from "path";
 import { runLocalAI } from "../utils/runLocalAI.js";
 import { fetchQuestions } from "../utils/hfQG.js";
 import { User } from "../models/user.model.js";
+import { Like } from "../models/like.model.js";
+
+
+export const getSingleVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const userId = req.user?._id;
+
+  if (!mongoose.isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
+  const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl");
+  if (!video) throw new ApiError(404, "Video not found");
+
+  const likeCount = await Like.countDocuments({ video: videoId });
+  const isLiked = userId
+    ? Boolean(await Like.exists({ video: videoId, likedBy: userId }))
+    : false;
+
+  res.json(new ApiResponse(200, { ...video.toObject(), likeCount, isLiked }));
+});
 
 
 
@@ -35,9 +53,8 @@ const processVideoAI = asyncHandler(async (req, res) => {
   video.questions  = questions;
   await video.save();
 
-  res.status(200).json(
-    new ApiResponse(200, { transcript, summary, questions }, "AI + MCQs generated")
-  );
+  res.status(200).json(new ApiResponse({ data: result }));
+
 });
 
 const getVideoAI = asyncHandler(async (req, res) => {
@@ -82,12 +99,7 @@ const getVideoAI = asyncHandler(async (req, res) => {
     .skip(skip)
     .limit(limit)
     .populate("owner", "fullName avatarUrl");
-
-  return res.status(200).json({
-    success: true,
-    message: "Videos fetched successfully",
-    data: videos
-  });
+  res.json(new ApiResponse(200, videos, "Videos fetched successfully"));
 });
 
 /**
@@ -194,11 +206,9 @@ const getVideoById = asyncHandler(async (req, res) => {
   const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl");
   if (!video) throw new ApiError(404, "Video not found");
 
-  return res.status(200).json({
-    success: true,
-    message: "Video fetched successfully",
-    data: video
-  });
+  return res.status(200).json(
+    new ApiResponse(200, video, "Video fetched successfully")
+  );
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

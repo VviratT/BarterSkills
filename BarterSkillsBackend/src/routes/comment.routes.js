@@ -1,17 +1,18 @@
 import { Router } from "express";
 import {
-  addComment,
-  deleteComment,
   getVideoComments,
+  addComment,
   updateComment,
+  deleteComment,
 } from "../controllers/comment.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+router.use(verifyJWT);
 
-router.use(verifyJWT);  // Secure all comment routes in this file
-
-router.route("/:videoId").get(getVideoComments).post(addComment);
-router.route("/c/:commentId").patch(updateComment).delete(deleteComment);
+router.get("/:videoId", getVideoComments);
+router.post("/:videoId", addComment);
+router.patch("/c/:commentId", updateComment);
+router.delete("/c/:commentId", deleteComment);
 
 export default router;
