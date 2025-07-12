@@ -33,32 +33,30 @@ export default function WatchPage() {
   const remainingCredits = user?.credits ?? 0;
   const qc = useQueryClient();
 
-  // Fetch the single video (with likeCount / isLiked baked in)
+  // Fetch video by ID
   const { data: video, isLoading } = useQuery({
     queryKey: ["video", videoId],
-    queryFn: () => api.get(`/videos/${videoId}`).then((r) => r.data.data),
+    queryFn: () => api.get(`/videos/${videoId}`).then((res) => res.data.data),
   });
 
-  // Like mutation
+  // Like toggle mutation
   const toggleLike = useMutation({
     mutationFn: () => api.post(`/likes/toggle/v/${videoId}`),
     onSuccess: () => qc.invalidateQueries(["video", videoId]),
   });
 
-  // AI-generation mutation
+  // AI generation mutation
   const generateAI = useMutation({
     mutationFn: () => api.post(`/videos/${videoId}/process-ai`),
-    onSuccess: () => {
-      // refetch video to get transcript/summary/questions
-      qc.invalidateQueries(["video", videoId]);
-    },
+    onSuccess: () => qc.invalidateQueries(["video", videoId]),
     onError: (err) => {
-     console.error("AI generation failed:", err);
-     alert("AI generation failed: " + (err.response?.data?.message || err.message));
-   },
+      console.error("AI generation failed:", err);
+      alert(
+        "AI generation failed: " + (err.response?.data?.message || err.message)
+      );
+    },
   });
 
-  // Toggles to show/hide each AI block
   const [showTranscript, setShowTranscript] = useState(true);
   const [showSummary, setShowSummary] = useState(true);
   const [showQuestions, setShowQuestions] = useState(true);
@@ -90,7 +88,7 @@ export default function WatchPage() {
 
   return (
     <Container maxWidth="md" sx={{ pt: 4 }}>
-      {/* video player */}
+      {/* Video player */}
       <Box sx={{ width: "100%", aspectRatio: "16/9", mb: 2 }}>
         <video
           controls
@@ -100,7 +98,7 @@ export default function WatchPage() {
         />
       </Box>
 
-      {/* title & uploader */}
+      {/* Title and uploader */}
       <Typography variant="h5" fontWeight="bold" gutterBottom>
         {video.title}
       </Typography>
@@ -109,7 +107,7 @@ export default function WatchPage() {
         <Typography>{video.owner?.fullName}</Typography>
       </Stack>
 
-      {/* like/button */}
+      {/* Like button and count */}
       <Stack direction="row" spacing={1} alignItems="center" mb={3}>
         <IconButton
           onClick={() => toggleLike.mutate()}
@@ -120,7 +118,7 @@ export default function WatchPage() {
         <Typography>{video.likeCount} Likes</Typography>
       </Stack>
 
-      {/* AI section */}
+      {/* AI-generated content */}
       {!hasAnyAI ? (
         <Box textAlign="center" my={4}>
           <Alert severity="info">No AI‑generated content yet.</Alert>
@@ -137,14 +135,14 @@ export default function WatchPage() {
         <>
           <Box mb={2}>
             <Typography variant="subtitle1" gutterBottom>
-              Show / hide AI panels:
+              Show / Hide AI Panels:
             </Typography>
             <FormGroup row>
               <FormControlLabel
                 control={
                   <Switch
                     checked={showTranscript}
-                    onChange={() => setShowTranscript((x) => !x)}
+                    onChange={() => setShowTranscript((prev) => !prev)}
                   />
                 }
                 label="Transcript"
@@ -153,7 +151,7 @@ export default function WatchPage() {
                 control={
                   <Switch
                     checked={showSummary}
-                    onChange={() => setShowSummary((x) => !x)}
+                    onChange={() => setShowSummary((prev) => !prev)}
                   />
                 }
                 label="Summary"
@@ -162,7 +160,7 @@ export default function WatchPage() {
                 control={
                   <Switch
                     checked={showQuestions}
-                    onChange={() => setShowQuestions((x) => !x)}
+                    onChange={() => setShowQuestions((prev) => !prev)}
                   />
                 }
                 label="Questions"
@@ -213,16 +211,16 @@ export default function WatchPage() {
 
       <Divider sx={{ my: 3 }} />
 
-      {/* comments */}
+      {/* Comments */}
       <Typography variant="h6" gutterBottom>
         Comments
       </Typography>
       <CommentList videoId={videoId} />
 
-      {/* related videos sidebar */}
+      {/* Related videos */}
       <RelatedVideos />
 
-      {/* remaining credits */}
+      {/* Credits (if not premium) */}
       {!video.isPremium && (
         <Box mt={3}>
           <Chip
