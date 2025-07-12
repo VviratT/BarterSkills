@@ -52,6 +52,10 @@ export default function WatchPage() {
       // refetch video to get transcript/summary/questions
       qc.invalidateQueries(["video", videoId]);
     },
+    onError: (err) => {
+     console.error("AI generation failed:", err);
+     alert("AI generation failed: " + (err.response?.data?.message || err.message));
+   },
   });
 
   // Toggles to show/hide each AI block
