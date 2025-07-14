@@ -11,51 +11,80 @@ import { runLocalAI } from "../utils/runLocalAI.js";
 import { fetchQuestions } from "../utils/hfQG.js";
 import { User } from "../models/user.model.js";
 import { Like } from "../models/like.model.js";
+import { View  } from "../models/view.model.js"; 
+
 
 
 export const getSingleVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  const userId = req.user?._id;
-
   if (!mongoose.isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
+
   const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl");
   if (!video) throw new ApiError(404, "Video not found");
 
-  const likeCount = await Like.countDocuments({ video: videoId });
-  const isLiked = userId
-    ? Boolean(await Like.exists({ video: videoId, likedBy: userId }))
+  // — Likes
+  const likeCount = await Like.countDocuments({ video: video._id });
+  const isLiked   = req.user
+    ? Boolean(await Like.exists({ video: video._id, likedBy: req.user._id }))
     : false;
 
-  res.json(new ApiResponse(200, { ...video.toObject(), likeCount, isLiked }));
+  // — Credits
+  let remainingCredits = null;
+  if (req.user) {
+    // always reflect their current credits
+    // deduct only on first view of a free video
+    if (!video.isPremium) {
+      const firstView = !await View.exists({ video: video._id, viewer: req.user._id });
+      if (firstView && req.user.credits > 0) {
+        req.user.credits -= 1;
+        await req.user.save();
+        await View.create({ video: video._id, viewer: req.user._id });
+      }
+    }
+    // *always* send back their up‑to‑date credits
+    remainingCredits = req.user.credits;
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Video fetched successfully",
+    data: {
+      ...video.toObject(),
+      likeCount,
+      isLiked,
+      remainingCredits,    // now *always* a number for logged‑in users
+    },
+  });
 });
 
 
 
-const processVideoAI = asyncHandler(async (req, res) => {
+
+ const processVideoAI = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const video = await Video.findById(videoId);
   if (!video) throw new ApiError(404, "Video not found");
 
-  const tempPath = path.resolve("public/temp", `${videoId}.mp4`);
+  // 1) run whisper + summarizer
+  const tempPath = `public/temp/${videoId}.mp4`;
   const { transcript, summary } = await runLocalAI(video.videoFile, tempPath);
 
+  // 2) questions
   const rawQs = await fetchQuestions(summary);
-
-  const questions = [];
-  for (const qText of rawQs) {
-    questions.push({
-      question: qText
-    });
-  }
-
   video.transcript = transcript;
   video.summary    = summary;
-  video.questions  = questions;
+  video.questions  = rawQs.map(q => ({ question: q }));
   await video.save();
 
-  res.status(200).json(new ApiResponse({ data: result }));
-
+  // 3) return the full updated video under `data`
+  return res.status(200).json({
+    success: true,
+    message: "AI content generated",
+    data: video,        // front‑end will re‑fetch and pick up transcript/summary/questions
+  });
 });
+
+
 
 const getVideoAI = asyncHandler(async (req, res) => {
   const { videoId } = req.params;

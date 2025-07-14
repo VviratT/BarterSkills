@@ -12,12 +12,15 @@ import {
 } from "../controllers/video.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { attachUserIfTokenExists } from "../middlewares/attachUser.js";
+
+
 
 const router = Router();
 
 // Public
 router.get("/", getAllVideos);
-router.get("/:videoId", getSingleVideo);
+router.get("/:videoId", attachUserIfTokenExists, getSingleVideo);
 
 // All routes below require auth
 router.use(verifyJWT);

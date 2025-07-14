@@ -29,15 +29,23 @@ import RelatedVideos from "../components/WatchSidebar/RelatedVideos";
 
 export default function WatchPage() {
   const { videoId } = useParams();
-  const { user } = useAuth();
+  const { user, setUser, fetchUser } = useAuth();
   const remainingCredits = user?.credits ?? 0;
+
   const qc = useQueryClient();
 
   // Fetch video by ID
-  const { data: video, isLoading } = useQuery({
+  // WatchPage.jsx (only the query part)
+  const {
+    data: video,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["video", videoId],
-    queryFn: () => api.get(`/videos/${videoId}`).then((res) => res.data.data),
+    queryFn: () => api.get(`/videos/${videoId}`).then((r) => r.data.data),
   });
+
 
   // Like toggle mutation
   const toggleLike = useMutation({
@@ -76,6 +84,15 @@ export default function WatchPage() {
       <Container>
         <Typography variant="h6" color="error">
           Video not found.
+        </Typography>
+      </Container>
+    );
+  }
+  if (error) {
+    return (
+      <Container>
+        <Typography variant="h6" color="error">
+          Failed to load video: {error.message}
         </Typography>
       </Container>
     );
@@ -221,10 +238,10 @@ export default function WatchPage() {
       <RelatedVideos />
 
       {/* Credits (if not premium) */}
-      {!video.isPremium && (
+      {!video.isPremium && typeof video.remainingCredits === "number" && (
         <Box mt={3}>
           <Chip
-            label={`Remaining credits: ${remainingCredits}`}
+            label={`Remaining credits: ${video.remainingCredits}`}
             variant="outlined"
             color="primary"
           />

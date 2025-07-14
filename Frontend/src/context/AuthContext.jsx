@@ -13,6 +13,10 @@ export const AuthContext = createContext({
   register: () => Promise.resolve(),
   logout: () => Promise.resolve(),
 });
+const fetchUser = async () => {
+  const res = await api.get("/users/me"); // or your own route
+  setUser(res.data);
+};
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -81,7 +85,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loadingAuth, login, register, logout, setUser}}
+      value={{ user, loadingAuth, login, register, logout, setUser, fetchUser}}
     >
       {children}
     </AuthContext.Provider>
