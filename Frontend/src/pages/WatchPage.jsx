@@ -26,6 +26,7 @@ import api from "../api/api.js";
 import useAuth from "../auth/useAuth.js";
 import CommentList from "../components/CommentSection/CommentList";
 import RelatedVideos from "../components/WatchSidebar/RelatedVideos";
+import SubscribeButton from "../components/SubscribeButton.jsx";
 
 export default function WatchPage() {
   const { videoId } = useParams();
@@ -122,6 +123,9 @@ export default function WatchPage() {
       <Stack direction="row" alignItems="center" spacing={2} mb={2}>
         <Avatar src={video.owner?.avatarUrl} />
         <Typography>{video.owner?.fullName}</Typography>
+        {user?._id !== video.owner?._id && (
+          <SubscribeButton username={video.owner.username} />
+        )}
       </Stack>
 
       {/* Like button and count */}

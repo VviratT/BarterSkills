@@ -43,3 +43,10 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+
+export const toggleSubscribe = (channelId) =>
+  api.post(`/subscriptions/c/${channelId}`);
+export const getChannelProfile = (username) =>
+  api.get(`/users/c/${username}`);
+
