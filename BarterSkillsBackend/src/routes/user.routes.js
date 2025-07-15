@@ -10,6 +10,7 @@ import {
     updateUserCoverImage, 
     getUserChannelProfile, 
     getWatchHistory, 
+    googleCallbackHandler,
     updateAccountDetails
 } from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
@@ -45,43 +46,23 @@ router.get("/auth/google",
 
 router.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/google/failure", session: false }),
-  async (req, res) => {
+  passport.authenticate("google", { failureRedirect: "/login", session: false }),
+  async (req, res, next) => {
     try {
-      // 'req.user' is the Mongoose document returned by Passport
+      // generate tokens
       const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(req.user._id);
 
-      // Set cookies
-      const cookieOpts = { httpOnly: true, sameSite: "Lax", secure: false };
-      res.cookie("accessToken", accessToken, cookieOpts);
-      res.cookie("refreshToken", refreshToken, cookieOpts);
-
-      // Send response
-      return res.status(200).json({
-        success: true,
-        message: "Google login successful",
-        data: {
-          user: {
-            _id: req.user._id,
-            fullName: req.user.fullName,
-            email: req.user.email,
-            username: req.user.username,
-            avatar: req.user.avatar,
-          },
-          accessToken,
-          refreshToken
-        }
-      });
-    } catch (error) {
-      console.error("🚨 Google login callback failed:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Google login failed",
-        error: error.message || error
-      });
+      // redirect into your React app with tokens in query
+      const redirectUrl = `${process.env.CLIENT_URL}/oauth/callback` +
+        `?accessToken=${accessToken}&refreshToken=${refreshToken}`;
+      return res.redirect(redirectUrl);
+    } catch (err) {
+      console.error("🚨 Google callback error:", err);
+      next(err);
     }
   }
 );
+
 
 
 //secured routes

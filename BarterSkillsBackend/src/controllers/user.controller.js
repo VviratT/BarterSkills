@@ -60,13 +60,7 @@ export const googleCallbackHandler = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Google Login Successful",
-      user,
-      accessToken,
-      refreshToken,
-    });
+    return res.redirect(`${process.env.FRONTEND_URL}/oauth/callback`);
   } catch (error) {
     res.status(500).json({ success: false, message: "Google login failed", error });
   }
@@ -263,8 +257,8 @@ const logoutUser = asyncHandler(async(req, res) => {
 
     return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken")
+    .clearCookie("refreshToken")
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 

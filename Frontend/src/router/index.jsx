@@ -12,7 +12,7 @@ import Upload    from "../pages/Upload.jsx";
 import VideoPlayer from "../pages/VideoPlayer.jsx";
 import Profile     from "../pages/Profile.jsx";
 import WatchPage from "../pages/WatchPage";
-
+import OAuthHandler from "../auth/OAuthHandler.jsx";
 import ProtectedRoute from "../auth/ProtectedRoute.jsx";
 
 export default function Router() {
@@ -23,6 +23,7 @@ export default function Router() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/oauth/callback" element={<OAuthHandler />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/watch/:videoId" element={<WatchPage />} />

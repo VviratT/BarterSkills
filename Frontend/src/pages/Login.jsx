@@ -9,6 +9,8 @@ import {
   Container,
   Alert,
 } from "@mui/material";
+import GoogleLoginButton from "../components/GoogleLoginButton.jsx";
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ export default function Login() {
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
             Log In
           </Button>
+          <GoogleLoginButton />
         </form>
         <Box mt={2}>
           <Typography variant="body2">
