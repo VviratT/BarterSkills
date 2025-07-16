@@ -17,6 +17,8 @@ import ProtectedRoute from "../auth/ProtectedRoute.jsx";
 import MessagesPage from "../pages/Messages";
 import ConversationsPage from "../pages/Conversations.jsx";
 import ConversationListPage from "../pages/ConversationListPage.jsx";
+import Search from "../pages/Search.jsx";
+
 
 export default function Router() {
   return (
@@ -28,14 +30,18 @@ export default function Router() {
         <Route path="/register" element={<Register />} />
         <Route path="/oauth/callback" element={<OAuthHandler />} />
         <Route path="/messages" element={<MessagesPage />} />
-
+        <Route path="/search" element={<Search />} />
+        
         <Route element={<ProtectedRoute />}>
           <Route path="/watch/:videoId" element={<WatchPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/video/:id" element={<VideoPlayer />} />
           <Route path="/conversations" element={<ConversationListPage />} />
-          <Route path="/conversations/:convId" element={<ConversationsPage />} />
+          <Route
+            path="/conversations/:convId"
+            element={<ConversationsPage />}
+          />
           <Route path="/profile/:username" element={<Profile />} />
         </Route>
 

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext,useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -7,7 +7,10 @@ import {
   Avatar,
   Box,
   MenuItem,
+  IconButton,
+  InputBase,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -15,6 +18,17 @@ import { useNavigate, Link } from "react-router-dom";
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [q, setQ] = useState("");
+
+  const onSearch = (e) => {
+    e.preventDefault();
+    const term = q.trim();
+    if (term) {
+      navigate(`/search?query=${encodeURIComponent(term)}`);
+      setQ("");
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -34,6 +48,23 @@ export default function Navbar() {
           >
             BarterSkills
           </Typography>
+        </Box>
+
+        {/* Search box */}
+        <Box
+          component="form"
+          onSubmit={onSearch}
+          sx={{ ml: "auto", display: "flex", alignItems: "center" }}
+        >
+          <InputBase
+            placeholder="Search…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            sx={{ color: "inherit", ml: 1 }}
+          />
+          <IconButton type="submit" color="inherit">
+            <SearchIcon />
+          </IconButton>
         </Box>
 
         {user ? (
