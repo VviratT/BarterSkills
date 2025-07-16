@@ -1,4 +1,3 @@
-// src/pages/Profile.jsx
 import React from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -15,19 +14,18 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../api/api.js";
 import { toggleSubscribe } from "../api/subscription.js"; 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const { username } = useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
 
-  // 1) Fetch channel profile
   const { data: channel, isLoading: loadingChannel } = useQuery({
     queryKey: ["channel", username],
     queryFn: () => api.get(`/users/c/${username}`).then((res) => res.data.data),
   });
 
-  // 2) Fetch that user's videos
   const { data: videos = [], isLoading: loadingVideos } = useQuery({
     queryKey: ["channelVideos", channel?._id],
     enabled: !!channel?._id,
@@ -37,13 +35,20 @@ export default function Profile() {
         .then((res) => res.data.data),
   });
 
-  // 3) Subscribe toggle mutation
   const subMut = useMutation({
     mutationFn: () => toggleSubscribe(channel._id),
     onSuccess: () => {
       qc.invalidateQueries(["channel", username]);
     },
   });
+
+   const dmMut = useMutation({
+     mutationFn: () => api.post("/messages", { otherUserId: channel._id }),
+     onSuccess: ({ data }) => {
+       const { convoId } = data.data;
+       navigate(`/conversations/${convoId}`);
+     },
+   });
 
   if (loadingChannel) return <Typography>Loading profile…</Typography>;
 
@@ -86,6 +91,15 @@ export default function Profile() {
           {channel.isSubscribed ? "Unsubscribe" : "Subscribe"}
         </Button>
       </Box>
+
+      {/* Message button */}
+         <Button
+           variant="outlined"
+           onClick={() => dmMut.mutate()}
+           disabled={dmMut.isLoading}
+         >
+           Direct Message
+         </Button>
 
       {/* Videos grid */}
       <Box sx={{ mt: 4 }}>

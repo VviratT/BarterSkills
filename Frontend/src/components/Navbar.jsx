@@ -6,6 +6,7 @@ import {
   Button,
   Avatar,
   Box,
+  MenuItem,
 } from "@mui/material";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useNavigate, Link } from "react-router-dom";
@@ -38,8 +39,11 @@ export default function Navbar() {
         {user ? (
           <>
             <Button color="inherit" component={Link} to="/messages">
-              Messages
+              Global Chat
             </Button>
+            <MenuItem color="inherit" component={Link} to="/conversations">
+              Direct Messages
+            </MenuItem>
             <Button color="inherit" component={Link} to="/">
               Home
             </Button>
