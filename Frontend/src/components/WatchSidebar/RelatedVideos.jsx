@@ -7,10 +7,12 @@ import {
   Skeleton,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "../../api/api";
 
 const RelatedVideos = () => {
+  const navigate = useNavigate();
+
   const { data, isLoading } = useQuery({
     queryKey: ["relatedVideos"],
     queryFn: async () => {
@@ -47,8 +49,17 @@ const RelatedVideos = () => {
                 <Typography variant="subtitle2" noWrap>
                   {video.title}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {video.owner?.fullName}
+                <Typography
+                  variant="caption"
+                  color="primary"
+                  sx={{ cursor: "pointer", display: "block" }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // prevent parent Link
+                    navigate(`/profile/${video.owner.username}`);
+                  }}
+                >
+                  {video.owner.fullName}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   • {video.views} views

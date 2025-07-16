@@ -1,5 +1,4 @@
-import API from "./auth";
-export const toggleSub = channelId =>
-  API.post(`/subscriptions/c/${channelId}`);
-export const fetchSubs = channelId =>
-  API.get(`/subscriptions/c/${channelId}`);
+import api from "./api.js";
+
+export const toggleSubscribe = (channelId) =>
+  api.post(`/subscriptions/c/${channelId}`).then((res) => res.data);

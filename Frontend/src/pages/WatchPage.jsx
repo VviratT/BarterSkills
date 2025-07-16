@@ -27,6 +27,7 @@ import useAuth from "../auth/useAuth.js";
 import CommentList from "../components/CommentSection/CommentList";
 import RelatedVideos from "../components/WatchSidebar/RelatedVideos";
 import SubscribeButton from "../components/SubscribeButton.jsx";
+import { Link } from "react-router-dom";
 
 export default function WatchPage() {
   const { videoId } = useParams();
@@ -121,8 +122,17 @@ export default function WatchPage() {
         {video.title}
       </Typography>
       <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-        <Avatar src={video.owner?.avatarUrl} />
-        <Typography>{video.owner?.fullName}</Typography>
+        <Link to={`/profile/${video.owner.username}`} style={{ textDecoration: 'none' }}>
+          <Avatar src={video.owner?.avatarUrl} sx={{ cursor: 'pointer' }} />
+        </Link>
+        <Link 
+          to={`/profile/${video.owner.username}`} 
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          <Typography sx={{ cursor: 'pointer', fontWeight: 500 }}>
+            {video.owner?.fullName}
+          </Typography>
+        </Link>
         {user?._id !== video.owner?._id && (
           <SubscribeButton username={video.owner.username} />
         )}

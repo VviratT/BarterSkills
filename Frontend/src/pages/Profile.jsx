@@ -1,83 +1,127 @@
 // src/pages/Profile.jsx
 import React from "react";
+import { useParams } from "react-router-dom";
 import {
   Container,
-  Typography,
+  Box,
   Avatar,
+  Typography,
   Button,
-  Stack,
-  CircularProgress,
+  Grid,
+  Card,
+  CardMedia,
+  CardContent,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getChannelProfile, toggleSubscribe } from "../api/api.js";
-import useAuth from "../auth/useAuth.js";
+import api from "../api/api.js";
+import { toggleSubscribe } from "../api/subscription.js"; 
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const { username } = useParams();
-  const { user } = useAuth();
   const qc = useQueryClient();
 
-  // 1) Fetch channel data
-  const { data, isLoading, error } = useQuery(["channel", username], () =>
-    getChannelProfile(username).then((r) => r.data.data)
-  );
+  // 1) Fetch channel profile
+  const { data: channel, isLoading: loadingChannel } = useQuery({
+    queryKey: ["channel", username],
+    queryFn: () => api.get(`/users/c/${username}`).then((res) => res.data.data),
+  });
 
-  // 2) Subscribe/unsubscribe mutation
-  const subMut = useMutation(() => toggleSubscribe(data._id), {
-    onMutate: async () => {
-      await qc.cancelQueries(["channel", username]);
-      const previous = qc.getQueryData(["channel", username]);
-      // Optimistic update
-      qc.setQueryData(["channel", username], (old) => ({
-        ...old,
-        isSubscribed: !old.isSubscribed,
-        subscribersCount: old.isSubscribed
-          ? old.subscribersCount - 1
-          : old.subscribersCount + 1,
-      }));
-      return { previous };
-    },
-    onError: (_err, _vars, context) => {
-      qc.setQueryData(["channel", username], context.previous);
-    },
-    onSettled: () => {
+  // 2) Fetch that user's videos
+  const { data: videos = [], isLoading: loadingVideos } = useQuery({
+    queryKey: ["channelVideos", channel?._id],
+    enabled: !!channel?._id,
+    queryFn: () =>
+      api
+        .get("/videos", { params: { userId: channel._id } })
+        .then((res) => res.data.data),
+  });
+
+  // 3) Subscribe toggle mutation
+  const subMut = useMutation({
+    mutationFn: () => toggleSubscribe(channel._id),
+    onSuccess: () => {
       qc.invalidateQueries(["channel", username]);
     },
   });
 
-  if (isLoading) return <CircularProgress />;
-  if (error)
-    return <Typography color="error">Failed to load channel.</Typography>;
-
-  const {
-    fullName,
-    avatar,
-    subscribersCount,
-    isSubscribed,
-    _id: channelId,
-  } = data;
-  const isMe = user?._id === channelId;
+  if (loadingChannel) return <Typography>Loading profile…</Typography>;
 
   return (
-    <Container sx={{ mt: 4, textAlign: "center" }}>
-      <Avatar src={avatar} sx={{ width: 100, height: 100, mx: "auto" }} />
-      <Typography variant="h4" mt={2}>
-        {fullName}
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary">
-        {subscribersCount} subscriber{subscribersCount === 1 ? "" : "s"}
-      </Typography>
+    <Container sx={{ mt: 4 }}>
+      {/* Cover + Avatar */}
+      <Box
+        sx={{
+          height: 200,
+          backgroundImage: `url(${channel.coverImage || "/default-cover.jpg"})`,
+          backgroundSize: "cover",
+          borderRadius: 1,
+        }}
+      />
+      <Avatar
+        src={channel.avatar}
+        sx={{
+          width: 100,
+          height: 100,
+          mt: -6,
+          border: "3px solid white",
+        }}
+      />
 
-      {!isMe && (
+      {/* Name / Stats / Subscribe */}
+      <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <Box>
+          <Typography variant="h5">{channel.fullName}</Typography>
+          <Typography color="textSecondary">@{channel.username}</Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {channel.subscribersCount} subscriber
+            {channel.subscribersCount !== 1 && "s"}
+          </Typography>
+        </Box>
         <Button
-          variant={isSubscribed ? "outlined" : "contained"}
+          variant={channel.isSubscribed ? "outlined" : "contained"}
           onClick={() => subMut.mutate()}
-          sx={{ mt: 2 }}
+          disabled={subMut.isLoading}
         >
-          {subMut.isLoading ? "…" : isSubscribed ? "Unsubscribe" : "Subscribe"}
+          {channel.isSubscribed ? "Unsubscribe" : "Subscribe"}
         </Button>
-      )}
+      </Box>
+
+      {/* Videos grid */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Videos by {channel.fullName}
+        </Typography>
+
+        {loadingVideos ? (
+          <Typography>Loading videos…</Typography>
+        ) : (
+          <Grid container spacing={2}>
+            {videos.map((v) => (
+              <Grid key={v._id} item xs={12} sm={6} md={4}>
+                <Link to={`/watch/${v._id}`} style={{ textDecoration: "none" }}>
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={v.thumbnail}
+                      alt={v.title}
+                    />
+                    <CardContent>
+                      <Typography variant="subtitle1" noWrap>
+                        {v.title}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary" noWrap>
+                        {v.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
     </Container>
   );
 }

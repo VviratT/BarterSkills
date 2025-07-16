@@ -37,7 +37,7 @@ export default function Navbar() {
 
         {user ? (
           <>
-            <Button color="inherit"  component={Link} to="/messages">
+            <Button color="inherit" component={Link} to="/messages">
               Messages
             </Button>
             <Button color="inherit" component={Link} to="/">
@@ -49,12 +49,19 @@ export default function Navbar() {
             <Button component={Link} to="/upload" color="inherit">
               Upload Video
             </Button>
-            <Avatar
-              src={user.avatar}
-              alt={user.fullName}
-              sx={{ ml: 2, mr: 1 }}
-            />
-            <Typography variant="body1">{user.fullName}</Typography>
+            <Link
+              to={`/profile/${user.username}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <Box display="flex" alignItems="center">
+                <Avatar
+                  src={user.avatar}
+                  alt={user.fullName}
+                  sx={{ ml: 2, mr: 1 }}
+                />
+                <Typography variant="body1">{user.fullName}</Typography>
+              </Box>
+            </Link>
             <Button color="inherit" onClick={handleLogout} sx={{ ml: 2 }}>
               Logout
             </Button>
