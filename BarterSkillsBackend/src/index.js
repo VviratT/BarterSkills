@@ -15,6 +15,7 @@ import { createServer } from "http";
 import { Server as IOServer } from "socket.io";
 import jwt from "jsonwebtoken";
 import { User } from "./models/user.model.js";
+import { ChatMessage } from "./models/chatMessage.model.js";
 
 const httpServer = createServer(app);
 
@@ -48,16 +49,26 @@ io.on("connection", (socket) => {
 
   socket.join("global");
 
-  socket.on("message", (text) => {
+  socket.on("message", async(text) => {
     const msg = {
       user: {
         _id: socket.user._id,
         username: socket.user.username,
+        fullName: socket.user.fullName,
+        avatar: socket.user.avatar,
       },
       text,
       createdAt: new Date(),
     };
     io.to("global").emit("message", msg);
+    try {
+      await ChatMessage.create({
+        sender: socket.user._id,
+        text,
+      });
+    } catch (err) {
+      console.error("Failed to save chat message:", err);
+    }
   });
 
   socket.on("disconnect", () => {

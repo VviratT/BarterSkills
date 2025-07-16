@@ -8,18 +8,20 @@ const API = axios.create({
 
 export const AuthContext = createContext({
   user: null,
+  accessToken: null,
   loadingAuth: true,
   login: () => Promise.resolve(),
   register: () => Promise.resolve(),
   logout: () => Promise.resolve(),
 });
 const fetchUser = async () => {
-  const res = await api.get("/users/me"); // or your own route
+  const res = await api.get("/users/me"); 
   setUser(res.data);
 };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function AuthProvider({ children }) {
           refreshToken: storedRT,
         });
         const newAccessToken = refreshRes.data.data.accessToken;
-
+        setAccessToken(newAccessToken);
         API.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${newAccessToken}`;
@@ -57,7 +59,7 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password }) => {
     const res = await API.post("/users/login", { email, password });
     const { accessToken, refreshToken, user: meUser } = res.data.data;
-
+    setAccessToken(accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     API.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     setUser(meUser);
@@ -69,7 +71,7 @@ export function AuthProvider({ children }) {
       headers: { "Content-Type": "multipart/form-data" },
     });
     const { accessToken, refreshToken, user: meUser } = res.data.data;
-
+    setAccessToken(accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     API.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     setUser(meUser);
@@ -85,7 +87,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loadingAuth, login, register, logout, setUser, fetchUser}}
+      value={{ user,accessToken, loadingAuth, login, register, logout, setUser, fetchUser}}
     >
       {children}
     </AuthContext.Provider>

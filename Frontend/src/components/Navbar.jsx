@@ -37,6 +37,9 @@ export default function Navbar() {
 
         {user ? (
           <>
+            <Button color="inherit"  component={Link} to="/messages">
+              Messages
+            </Button>
             <Button color="inherit" component={Link} to="/">
               Home
             </Button>

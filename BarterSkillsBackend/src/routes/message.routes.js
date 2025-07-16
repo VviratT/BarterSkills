@@ -1,19 +1,22 @@
-import express from "express";
-import {
-  sendMessage,
-  getConversation,
-  markAsRead
-} from "../controllers/message.controllers.js";
+import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  getConversations,
+  getConversation,
+  createConversation,
+  postMessage,
+  getGlobalHistory, 
+} from "../controllers/message.controllers.js";
 
-const router = express.Router();
+const router = Router();
+
+router.get("/global", verifyJWT, getGlobalHistory);
 
 router.use(verifyJWT);
 
-router.post("/:receiverId", sendMessage);
-
-router.get("/:otherUserId", getConversation);
-
-router.patch("/read/:otherUserId", markAsRead);
+router.get("/conversations", getConversations);
+router.post("/", createConversation);
+router.get("/:convId", getConversation);
+router.post("/:convId", postMessage);
 
 export default router;
