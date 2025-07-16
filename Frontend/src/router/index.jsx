@@ -23,7 +23,6 @@ import Search from "../pages/Search.jsx";
 export default function Router() {
   return (
     <>
-      <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
