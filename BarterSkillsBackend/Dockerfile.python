@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 WORKDIR /app
 
-COPY qg_service.py .
+COPY BarterSkillsBackend/qg_service.py .
 
 RUN pip install --no-cache-dir torch transformers fastapi uvicorn openai-whisper
 

@@ -3,15 +3,15 @@ services:
     name: barter-backend
     env: docker
     plan: free
-    repo: https://github.com/VviratT/BarterSkills
-    branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
+    buildCommand: ""
+    startCommand: ""
     buildFilter:
       paths:
         - BarterSkillsBackend/**
     envVars:
       - key: PORT
-        sync: false
+        value: 4000
       - key: MONGODB_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
@@ -51,14 +51,16 @@ services:
     name: barter-python
     env: docker
     plan: free
-    repo: https://github.com/VviratT/BarterSkills
-    branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
+    buildCommand: ""
+    startCommand: ""
     buildFilter:
       paths:
         - BarterSkillsBackend/qg_service.py
         - BarterSkillsBackend/Dockerfile.python
     envVars:
+      - key: PORT
+        value: 8001
       - key: HF_API_KEY
         sync: false
       - key: WHISPER_CMD
