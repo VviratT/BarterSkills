@@ -1,34 +1,62 @@
 services:
-  # 1) QG FastAPI service
   - type: web
-    name: barterskills-qg
+    name: barter-backend
     env: docker
-    branch: main
-    dockerfilePath: BarterSkillsBackend/Dockerfile.python
-    # it listens on 8001 by CMD in Dockerfile.python
-    autoDeploy: true
-    plan: starter
-
-  # 2) Node/Express backend
-  - type: web
-    name: barterskills-backend
-    env: docker
+    repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
-    autoDeploy: true
-    plan: starter
-
-  # 3) Vite/React frontend
-  - type: static
-    name: barterskills-frontend
-    branch: main
-    rootDir: frontend
-    buildCommand: |
-      npm install
-      npm run build
-    publishDir: frontend/dist
+    buildFilter:
+      paths: 
+        - BarterSkillsBackend/**
     envVars:
-      - key: VITE_API_URL
-        fromService: barterskills-backend
-        servicePath: /api/v1
-    plan: starter
+      - key: MONGODB_URI
+        sync: false
+      - key: ACCESS_TOKEN_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_PLAN_MONTHLY
+        sync: false
+      - key: RAZORPAY_PLAN_YEARLY
+        sync: false
+      - key: QG_URL
+        sync: false
+      - key: HF_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: PORT
+        sync: false
+
+  - type: web
+    name: barter-python
+    env: docker
+    repo: https://github.com/VviratT/BarterSkills
+    branch: main
+    dockerfilePath: BarterSkillsBackend/Dockerfile.python
+    buildFilter:
+      paths:
+        - BarterSkillsBackend/Dockerfile.python
+    envVars:
+      - key: HF_API_KEY
+        sync: false
+      - key: WHISPER_CMD
+        sync: false
