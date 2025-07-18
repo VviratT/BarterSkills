@@ -29,6 +29,7 @@ import {
   Search as SearchIcon,
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
+  Star as StarIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
@@ -82,45 +83,45 @@ export default function ResponsiveDrawer({ children }) {
       <Divider />
 
       <List>
+        <ListItemButton component={RouterLink} to="/premium">
+          <ListItemIcon>
+            <StarIcon />
+          </ListItemIcon>
+          <ListItemText primary="Go Premium" />
+        </ListItemButton>
+
         <ListItemButton component={RouterLink} to="/">
           <ListItemIcon>
             <HomeIcon />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
-
         <ListItemButton component={RouterLink} to="/dashboard">
           <ListItemIcon>
             <DashboardIcon />
           </ListItemIcon>
           <ListItemText primary="Dashboard" />
         </ListItemButton>
-
         <ListItemButton component={RouterLink} to="/upload">
           <ListItemIcon>
             <UploadIcon />
           </ListItemIcon>
           <ListItemText primary="Upload" />
         </ListItemButton>
-
         <Divider sx={{ my: 1 }} />
-
         <ListItemButton component={RouterLink} to="/messages">
           <ListItemIcon>
             <ChatIcon />
           </ListItemIcon>
           <ListItemText primary="Global Chat" />
         </ListItemButton>
-
         <ListItemButton component={RouterLink} to="/conversations">
           <ListItemIcon>
             <MessageIcon />
           </ListItemIcon>
           <ListItemText primary="Direct Messages" />
         </ListItemButton>
-
         <Divider sx={{ my: 1 }} />
-
         {user && (
           <>
             <ListItemButton
