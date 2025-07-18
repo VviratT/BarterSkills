@@ -51,6 +51,7 @@ services:
     name: barter-python
     env: docker
     plan: free
+    buildCommand: ""
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
