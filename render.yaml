@@ -4,8 +4,6 @@ services:
     env: docker
     plan: free
     dockerfilePath: BarterSkillsBackend/Dockerfile
-    buildCommand: ""
-    startCommand: ""
     buildFilter:
       paths:
         - BarterSkillsBackend/**
@@ -52,8 +50,6 @@ services:
     env: docker
     plan: free
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
-    buildCommand: ""
-    startCommand: ""
     buildFilter:
       paths:
         - BarterSkillsBackend/qg_service.py
