@@ -2,6 +2,7 @@ services:
   - type: web
     name: barter-backend
     env: docker
+    plan: free
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
@@ -49,6 +50,7 @@ services:
   - type: web
     name: barter-python
     env: docker
+    plan: free
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
