@@ -6,6 +6,7 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
+    context: BarterSkillsBackend
     buildFilter:
       paths: 
         - BarterSkillsBackend/**
@@ -55,6 +56,7 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
+    context: BarterSkillsBackend
     buildFilter:
       paths:
         - BarterSkillsBackend/Dockerfile.python
