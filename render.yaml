@@ -6,46 +6,13 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
-    buildCommand: "" # No need
     buildFilter:
-      paths: 
+      paths:
         - BarterSkillsBackend/**
     envVars:
-      - key: MONGODB_URI
-        sync: false
-      - key: ACCESS_TOKEN_SECRET
-        sync: false
-      - key: REFRESH_TOKEN_SECRET
-        sync: false
-      - key: CLOUDINARY_CLOUD_NAME
-        sync: false
-      - key: CLOUDINARY_API_KEY
-        sync: false
-      - key: CLOUDINARY_API_SECRET
-        sync: false
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: CLIENT_URL
-        sync: false
-      - key: SESSION_SECRET
-        sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: RAZORPAY_PLAN_MONTHLY
-        sync: false
-      - key: RAZORPAY_PLAN_YEARLY
-        sync: false
-      - key: QG_URL
-        sync: false
-      - key: HF_API_KEY
-        sync: false
-      - key: FRONTEND_URL
-        sync: false
       - key: PORT
+        sync: false
+      - key: MONGODB_URI; ACCESS_TOKEN_SECRET; REFRESH_TOKEN_SECRET; CLOUDINARY_CLOUD_NAME; CLOUDINARY_API_KEY; CLOUDINARY_API_SECRET; GOOGLE_CLIENT_ID; GOOGLE_CLIENT_SECRET; CLIENT_URL; SESSION_SECRET; RAZORPAY_KEY_ID; RAZORPAY_KEY_SECRET; RAZORPAY_PLAN_MONTHLY; RAZORPAY_PLAN_YEARLY; QG_URL; HF_API_KEY; FRONTEND_URL
         sync: false
 
   - type: web
@@ -55,13 +22,10 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
-    buildCommand: "" # No need
     buildFilter:
       paths:
-        - BarterSkillsBackend/Dockerfile.python
         - BarterSkillsBackend/qg_service.py
+        - BarterSkillsBackend/Dockerfile.python
     envVars:
-      - key: HF_API_KEY
-        sync: false
-      - key: WHISPER_CMD
+      - key: HF_API_KEY; WHISPER_CMD
         sync: false
