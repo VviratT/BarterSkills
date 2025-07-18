@@ -3,13 +3,13 @@ services:
     name: barter-backend
     env: docker
     plan: free
+    repo: https://github.com/VviratT/BarterSkills
+    branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
     buildFilter:
       paths:
         - BarterSkillsBackend/**
     envVars:
-      - key: PORT
-        value: 4000
       - key: MONGODB_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
@@ -44,19 +44,22 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
+      - key: PORT
+        sync: false
 
   - type: web
     name: barter-python
     env: docker
     plan: free
+    repo: https://github.com/VviratT/BarterSkills
+    branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
+    buildCommand: ""
+    startCommand: "uvicorn qg_services.main:app --host 0.0.0.0 --port 10000"
     buildFilter:
       paths:
-        - BarterSkillsBackend/qg_service.py
         - BarterSkillsBackend/Dockerfile.python
     envVars:
-      - key: PORT
-        value: 8001
       - key: HF_API_KEY
         sync: false
       - key: WHISPER_CMD
