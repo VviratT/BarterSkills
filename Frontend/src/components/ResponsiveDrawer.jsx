@@ -27,16 +27,21 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
   Search as SearchIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon,
 } from "@mui/icons-material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
+import { useThemeMode } from "../context/ThemeContext.jsx";
+
 
 const drawerWidth = 240;
 
 export default function ResponsiveDrawer({ children }) {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
-
+  const { mode, toggleMode } = useThemeMode();
+  
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -199,10 +204,14 @@ export default function ResponsiveDrawer({ children }) {
             </IconButton>
           </Box>
 
+          <IconButton color="inherit" onClick={toggleMode}>
+            {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+          </IconButton>
+
           {user && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <IconButton onClick={handleAvatarClick} sx={{ mr:1 }}>
-                <Avatar src={user.avatar} />    
+              <IconButton onClick={handleAvatarClick} sx={{ mr: 1 }}>
+                <Avatar src={user.avatar} />
               </IconButton>
               <Typography variant="body1" sx={{ mr: 1 }}>
                 {user.fullName}

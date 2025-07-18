@@ -1,4 +1,5 @@
-import React, { useContext,useState } from "react";
+// src/components/Navbar.jsx
+import React, { useContext } from "react";
 import {
   AppBar,
   Toolbar,
@@ -6,98 +7,70 @@ import {
   Button,
   Avatar,
   Box,
-  MenuItem,
   IconButton,
-  InputBase,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { AuthContext } from "../context/AuthContext.jsx";
+import { useThemeMode } from "../context/ThemeContext.jsx";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "../api/api.js";
 import { useNavigate, Link } from "react-router-dom";
 
-
 export default function Navbar() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, setUser, logout } = useContext(AuthContext);
+  const { mode, toggleMode } = useThemeMode();
+  const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const [q, setQ] = useState("");
-
-  const onSearch = (e) => {
-    e.preventDefault();
-    const term = q.trim();
-    if (term) {
-      navigate(`/search?query=${encodeURIComponent(term)}`);
-      setQ("");
+  const premiumMut = useMutation(
+    () => api.post("/users/premium", { days: 30 }),
+    {
+      onSuccess: ({ data }) => {
+        // re‑fetch current user and update context
+        api.get("/users/current-user").then((res) => {
+          setUser(res.data.data);
+          qc.invalidateQueries(["current-user"]);
+        });
+      },
+      onError: (err) => alert(err.response?.data?.message || err.message),
     }
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
+  );
 
   return (
     <AppBar position="sticky">
       <Toolbar>
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/"
-            color="inherit"
-            sx={{ textDecoration: "none" }}
-          >
-            BarterSkills
-          </Typography>
-        </Box>
-
-        {/* Search box */}
-        <Box
-          component="form"
-          onSubmit={onSearch}
-          sx={{ ml: "auto", display: "flex", alignItems: "center" }}
+        <Typography
+          variant="h6"
+          component={Link}
+          to="/"
+          color="inherit"
+          sx={{ textDecoration: "none", flexGrow: 1 }}
         >
-          <InputBase
-            placeholder="Search…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            sx={{ color: "inherit", ml: 1 }}
-          />
-          <IconButton type="submit" color="inherit">
-            <SearchIcon />
-          </IconButton>
-        </Box>
+          BarterSkills
+        </Typography>
+
+        {/* Dark/Light toggle */}
+        <IconButton color="inherit" onClick={toggleMode} sx={{ mr: 2 }}>
+          {mode === "light" ? <Brightness4Icon /> : <Brightness7Icon />}
+        </IconButton>
+
+        {user && !user.isPremium && (
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => premiumMut.mutate()}
+            disabled={premiumMut.isLoading}
+            sx={{ mr: 2 }}
+          >
+            Go Premium
+          </Button>
+        )}
 
         {user ? (
           <>
-            <Button color="inherit" component={Link} to="/messages">
-              Global Chat
-            </Button>
-            <MenuItem color="inherit" component={Link} to="/conversations">
-              Direct Messages
-            </MenuItem>
-            <Button color="inherit" component={Link} to="/">
-              Home
-            </Button>
-            <Button color="inherit" component={Link} to="/dashboard">
-              Dashboard
-            </Button>
-            <Button component={Link} to="/upload" color="inherit">
-              Upload Video
-            </Button>
-            <Link
-              to={`/profile/${user.username}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <Box display="flex" alignItems="center">
-                <Avatar
-                  src={user.avatar}
-                  alt={user.fullName}
-                  sx={{ ml: 2, mr: 1 }}
-                />
-                <Typography variant="body1">{user.fullName}</Typography>
-              </Box>
-            </Link>
-            <Button color="inherit" onClick={handleLogout} sx={{ ml: 2 }}>
+            {/* ... your other nav items */}
+            <Button color="inherit" onClick={logout}>
               Logout
             </Button>
           </>
