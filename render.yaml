@@ -6,7 +6,8 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
-    context: BarterSkillsBackend
+    buildCommand: |
+      cp -r BarterSkillsBackend/* .
     buildFilter:
       paths: 
         - BarterSkillsBackend/**
@@ -52,11 +53,11 @@ services:
     name: barter-python
     env: docker
     plan: free
-    buildCommand: ""
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
-    context: BarterSkillsBackend
+    buildCommand: |
+      cp -r BarterSkillsBackend/* .
     buildFilter:
       paths:
         - BarterSkillsBackend/Dockerfile.python
