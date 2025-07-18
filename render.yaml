@@ -1,0 +1,34 @@
+services:
+  # 1) QG FastAPI service
+  - type: web
+    name: barterskills-qg
+    env: docker
+    branch: main
+    dockerfilePath: BarterSkillsBackend/Dockerfile.python
+    # it listens on 8001 by CMD in Dockerfile.python
+    autoDeploy: true
+    plan: starter
+
+  # 2) Node/Express backend
+  - type: web
+    name: barterskills-backend
+    env: docker
+    branch: main
+    dockerfilePath: BarterSkillsBackend/Dockerfile
+    autoDeploy: true
+    plan: starter
+
+  # 3) Vite/React frontend
+  - type: static
+    name: barterskills-frontend
+    branch: main
+    rootDir: frontend
+    buildCommand: |
+      npm install
+      npm run build
+    publishDir: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService: barterskills-backend
+        servicePath: /api/v1
+    plan: starter
