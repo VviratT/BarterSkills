@@ -1,20 +1,23 @@
-# Use official Node.js image
+# Use Node 18
 FROM node:18
 
-# Create app directory
-WORKDIR /app
+# Where your code lives inside the container:
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
+# First copy only package manifests, install deps
+COPY BarterSkillsBackend/package*.json ./
 RUN npm install
 
-# Copy the rest of the app
-COPY . .
+# Then copy the rest of your application
+COPY BarterSkillsBackend/ ./
 
-# Expose the backend port (adjust if it's different)
-EXPOSE 8000
+# Build (if you have a build step; remove if not)
+# RUN npm run build
 
-# Start the app using your dev script
+# Expose your port
+ARG PORT=8000
+ENV PORT=${PORT}
+EXPOSE ${PORT}
+
+# Use your dev script or start script
 CMD ["npm", "run", "dev"]

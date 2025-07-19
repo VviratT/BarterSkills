@@ -6,10 +6,9 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile
-    buildFilter:
-      paths:
-        - BarterSkillsBackend/**
     envVars:
+      - key: PORT
+        value: "8000"
       - key: MONGODB_URI
         sync: false
       - key: ACCESS_TOKEN_SECRET
@@ -54,11 +53,9 @@ services:
     repo: https://github.com/VviratT/BarterSkills
     branch: main
     dockerfilePath: BarterSkillsBackend/Dockerfile.python
-    buildCommand: ""
-    buildFilter:
-      paths:
-        - BarterSkillsBackend/Dockerfile.python
     envVars:
+      - key: PORT
+        value: "10000"
       - key: HF_API_KEY
         sync: false
       - key: WHISPER_CMD
