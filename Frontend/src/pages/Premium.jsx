@@ -1,4 +1,3 @@
-// src/pages/Premium.jsx
 import React, { useState } from "react";
 import {
   Button,
@@ -25,53 +24,38 @@ function loadRazorpayScript() {
 }
 
 export default function Premium() {
-  const { user, setUser, refreshUser } = useAuth();
+  const { user, setUser,refreshUser } = useAuth();
   const [plan, setPlan] = useState("monthly");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔧 Fix: define this handler
-  const handlePlanChange = (_event, newPlan) => {
+  const handlePlanChange = (_e, newPlan) => {
     if (newPlan) setPlan(newPlan);
   };
 
-  const handleSubscribe = async () => {
+  const handlePurchase = async () => {
     setError("");
     setLoading(true);
     try {
-      // 1) Kick off subscription on the backend
-      const resp = await api.post("/billing/subscribe", { plan });
-      console.log("subscribe resp:", resp.data);
-      const { key, subscriptionId } = resp.data; // <– subscriptionId here
+      const { data } = await api.post("/billing/create-order", { plan });
+      const { key, orderId, amount, currency } = data;
 
-      // 2) Load Razorpay script
       await loadRazorpayScript();
 
-      // 3) Open checkout
       new window.Razorpay({
         key,
-        subscription_id: subscriptionId,
+        amount, 
+        currency,
         name: "BarterSkills Premium",
-        description:
-          plan === "monthly" ? "Monthly Plan (₹50)" : "Yearly Plan (₹500)",
-        handler: async () => {
-          console.log(
-            "✅ Razorpay payment successful – verifying subscription…"
+        description: plan === "monthly" ? "30‑Day Plan" : "1‑Year Plan",
+        order_id: orderId,
+        handler: async (resp) => {
+          const { data: userData } = await api.post(
+            "/billing/verify-payment",
+            resp
           );
-
-          const now = new Date();
-          const expiresAt = new Date(
-            now.setDate(now.getDate() + (plan === "monthly" ? 30 : 365))
-          );
-          setUser((u) => ({
-            ...u,
-            isPremium: true,
-            premiumExpiresAt: expiresAt.toISOString(),
-          }));
-   
-          console.log(
-            `🟢 Marked premium locally until ${expiresAt.toLocaleDateString()}`
-          );
+          setUser(userData);
+          await refreshUser();
         },
         prefill: {
           name: user.fullName,
@@ -79,13 +63,12 @@ export default function Premium() {
         },
       }).open();
     } catch (err) {
-      console.error("Subscribe error:", err);
+      console.error("Purchase error:", err);
       setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <Container sx={{ mt: 4, maxWidth: 600 }}>
@@ -111,7 +94,7 @@ export default function Premium() {
           <ToggleButtonGroup
             value={plan}
             exclusive
-            onChange={handlePlanChange} // now defined
+            onChange={handlePlanChange}
             sx={{ mb: 2 }}
           >
             <ToggleButton value="monthly">Monthly ₹50</ToggleButton>
@@ -123,13 +106,13 @@ export default function Premium() {
             size="large"
             fullWidth
             disabled={loading || user?.isPremium}
-            onClick={handleSubscribe}
+            onClick={handlePurchase}
           >
             {user?.isPremium
               ? "You’re Premium"
               : loading
               ? "Processing…"
-              : "Subscribe Now"}
+              : "Buy Now"}
           </Button>
         </CardContent>
       </Card>

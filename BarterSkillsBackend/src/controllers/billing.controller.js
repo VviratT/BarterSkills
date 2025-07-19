@@ -10,120 +10,58 @@ const razor = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const PLAN_CONFIG = {
-  monthly: { planId: process.env.RAZORPAY_PLAN_MONTHLY, amount: 5000, currency: "INR" },
-  yearly:  { planId: process.env.RAZORPAY_PLAN_YEARLY,  amount: 50000, currency: "INR" },
-};
-
-export const createSubscription = asyncHandler(async (req, res) => {
+export const createOrder = asyncHandler(async (req, res) => {
   const { plan } = req.body;
-  if (!PLAN_CONFIG[plan]) {
-    throw new ApiError(400, "Plan must be 'monthly' or 'yearly'");
+
+  if (!plan || !["monthly", "yearly"].includes(plan)) {
+    throw new ApiError(400, "Invalid or missing plan");
   }
 
-  // 0) Don’t let already‑premium users re‑subscribe
-  if (req.user.isPremium && new Date(req.user.premiumExpiresAt) > new Date()) {
-    throw new ApiError(400, "You already have an active premium subscription");
-  }
+  const amount = plan === "yearly" ? 50000 : 5000;
 
-  const { planId, amount, currency } = PLAN_CONFIG[plan];
+  const order = await razor.orders.create({
+  amount,
+  currency: "INR",
+  receipt: `rcpt_${Date.now()}_${req.user._id.toString().slice(-6)}`,
+  notes: {
+    plan,
+    userId: req.user._id.toString(),
+  },
+});
 
-  // 1) Create (or reuse) customer, without throwing on duplicates
-  let customer;
-  try {
-    customer = await razor.customers.create({
-      name:          req.user.fullName,
-      email:         req.user.email,
-      fail_existing: false,
-    });
-  } catch (err) {
-    // In the rare case fail_existing doesn’t catch it, fetch existing customer
-    if (err.error?.code === "BAD_REQUEST_ERROR" && err.error?.description?.includes("already exists")) {
-      const { items } = await razor.customers.all({ email: req.user.email, count: 1 });
-      customer = items[0];
-    } else {
-      throw err;
-    }
-  }
 
-  // 2) Create subscription
-  const subscription = await razor.subscriptions.create({
-    plan_id:         planId,
-    customer_notify: 1,
-    total_count:     plan === "monthly" ? 12 : 1,
-    customer_id:     customer.id,
-    notes:           { userId: req.user._id.toString() },
-  });
-
-  // 3) Return exactly what the frontend expects
-  return res.status(200).json({
-      key:          process.env.RAZORPAY_KEY_ID,
-      subscriptionId: subscription.id,
-      amount,   // use our static plan amount
-      currency, // use our static plan currency
+  res.status(200).json({
+    key: process.env.RAZORPAY_KEY_ID,
+    orderId: order.id,
+    amount: order.amount,
+    currency: order.currency,
   });
 });
 
 
-/**
- * POST /api/v1/billing/webhook
- * Razorpay will send subscription.charged events here
- */
-export const razorpayWebhook = asyncHandler(async (req, res) => {
-  const secret    = process.env.RAZORPAY_KEY_SECRET;
-  const body      = JSON.stringify(req.body);
-  const signature = req.headers["x-razorpay-signature"];
-  const expected  = crypto.createHmac("sha256", secret).update(body).digest("hex");
+export const verifyPayment = asyncHandler(async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body)
+    .digest("hex");
 
-  if (signature !== expected) {
-    return res.status(400).json({ success: false, message: "Invalid signature" });
+  if (expected !== razorpay_signature) {
+    throw new ApiError(400, "Invalid signature");
   }
 
-  const { event, payload } = req.body;
-  if (event === "subscription.charged") {
-    const sub       = payload.subscription.entity;
-    const userId    = sub.notes.userId;
-    const expiresAt = new Date(sub.current_end * 1000);
+  const order = await razor.orders.fetch(razorpay_order_id);
+  const { plan, userId } = order.notes;
+  const now = new Date();
+  const expiresAt = new Date(now.setDate(now.getDate() + (plan === "yearly" ? 365 : 30)));
 
-    await User.findByIdAndUpdate(userId, {
-      isPremium:        true,
-      premiumExpiresAt: expiresAt,
-    });
-    console.log(`✅ Premium activated for ${userId} until ${expiresAt}`);
-  }
-
-  res.json({ success: true });
-});
-
-export const verifySubscription = asyncHandler(async (req, res) => {
-  const { subscriptionId } = req.body;
-  if (!subscriptionId) {
-    throw new ApiError(400, "subscriptionId is required");
-  }
-
-  // Fetch from Razorpay
-  const subscription = await razor.subscriptions.fetch(subscriptionId);
-  if (subscription.status !== "active") {
-    throw new ApiError(400, "Subscription is not active yet");
-  }
-
-  // Compute expiry
-  const expiresAt = new Date(subscription.current_end * 1000);
-
-  // Update user
   const user = await User.findByIdAndUpdate(
-    subscription.notes.userId,
+    userId,
     { isPremium: true, premiumExpiresAt: expiresAt },
     { new: true }
   );
+  if (!user) throw new ApiError(404, "User not found");
 
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-
-  // Return fresh user data
-  return res.status(200).json({
-    success: true,
-    data: user,
-  });
+  res.status(200).json({ success: true, data: user });
 });

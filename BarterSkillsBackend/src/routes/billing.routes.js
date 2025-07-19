@@ -1,22 +1,10 @@
 import { Router } from "express";
-import bodyParser from "body-parser";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import {
-  createSubscription,
-  razorpayWebhook,
-  verifySubscription 
-} from "../controllers/billing.controller.js";
+import { createOrder, verifyPayment } from "../controllers/billing.controller.js";
 
 const router = Router();
 
-router.post("/subscribe", verifyJWT, createSubscription);
-
-router.post(
-  "/webhook",
-  bodyParser.json({ type: "application/json" }),
-  razorpayWebhook
-);
-
-router.post("/verify-subscription", verifyJWT, verifySubscription);
+router.post("/create-order", verifyJWT, createOrder);
+router.post("/verify-payment", verifyJWT, verifyPayment);
 
 export default router;

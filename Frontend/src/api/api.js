@@ -5,19 +5,25 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// catch 401s and try to refresh
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
 api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
-    // only do this once per request
     if (
       error.response?.status === 401 &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
-      try {
-        // use your refresh-token endpoint
+      try {nt
         const storedRT = localStorage.getItem("refreshToken");
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_URL}/users/refresh-token`,
@@ -25,13 +31,10 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
         const newAccess = data.data.accessToken;
-        // update axios defaults & this request
         api.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
         originalRequest.headers["Authorization"] = `Bearer ${newAccess}`;
-        // retry the original request
         return api(originalRequest);
       } catch (refreshErr) {
-        // if refresh fails, clear tokens & redirect to login
         localStorage.removeItem("refreshToken");
         delete api.defaults.headers.common["Authorization"];
         window.location.href = "/login";
