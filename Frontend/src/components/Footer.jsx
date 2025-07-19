@@ -15,6 +15,17 @@ export default function Footer() {
           GitHub
         </Link>
       </Typography>
+      {[
+        ["Privacy Policy", "/privacy-policy"],
+        ["Terms & Conditions", "/terms-and-conditions"],
+        ["Cancellation & Refund", "/cancellation-refund"],
+        ["Shipping & Delivery", "/shipping-delivery"],
+        ["Contact Us", "/contact-us"],
+      ].map(([label, to]) => (
+        <Link key={to} href={to} sx={{ mx: 1 }}>
+          {label}
+        </Link>
+      ))}
     </Box>
   );
 }

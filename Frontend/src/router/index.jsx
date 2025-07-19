@@ -19,6 +19,11 @@ import ConversationsPage from "../pages/Conversations.jsx";
 import ConversationListPage from "../pages/ConversationListPage.jsx";
 import Search from "../pages/Search.jsx";
 import Premium from "../pages/Premium.jsx";
+import PrivacyPolicy from "../pages/PrivacyPolicy.jsx";
+import TermsAndConditions from "../pages/TermsConditions.jsx";
+import CancellationRefund from "../pages/RefundPolicy.jsx";
+import ShippingDelivery from "../pages/ShippingPolicy.jsx";
+import ContactUs from "../pages/ContactUs.jsx";
 
 export default function Router() {
   return (
@@ -43,6 +48,17 @@ export default function Router() {
           />
           <Route path="/premium" element={<Premium />} />
           <Route path="/profile/:username" element={<Profile />} />
+
+
+
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsAndConditions />}
+          />
+          <Route path="/cancellation-refund" element={<CancellationRefund />} />
+          <Route path="/shipping-delivery" element={<ShippingDelivery />} />
+          <Route path="/contact-us" element={<ContactUs />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
