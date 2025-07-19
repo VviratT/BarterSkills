@@ -8,11 +8,14 @@ import {
 import { Link } from "react-router-dom";
 import useAuth from "../../auth/useAuth.js";
 
-export default function AppBar() {
+export default function AppBar({ drawerWidth }) {
   const { user, logout } = useAuth();
 
   return (
-    <MuiAppBar position="fixed">
+    <MuiAppBar
+      position="fixed"
+      sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
+    >
       <Toolbar>
         <Typography
           variant="h6"
@@ -24,11 +27,9 @@ export default function AppBar() {
         </Typography>
 
         {user ? (
-          <>
-            <Button color="inherit" onClick={logout}>
-              Logout
-            </Button>
-          </>
+          <Button color="inherit" onClick={logout}>
+            Logout
+          </Button>
         ) : (
           <>
             <Button color="inherit" component={Link} to="/login">

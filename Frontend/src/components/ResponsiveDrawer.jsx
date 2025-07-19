@@ -161,14 +161,19 @@ export default function ResponsiveDrawer({ children }) {
             }),
         }}
       >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={toggleDrawer}
-              sx={{ mr: 2 }}
-            >
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+            flexWrap: "wrap",
+            px: { xs: 1, sm: 2 },
+          }}
+        >
+          {/* Left: Menu + Logo */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <IconButton color="inherit" edge="start" onClick={toggleDrawer}>
               <MenuIcon />
             </IconButton>
             <Typography
@@ -182,16 +187,21 @@ export default function ResponsiveDrawer({ children }) {
             </Typography>
           </Box>
 
+          {/* Center-Left: Search Bar */}
           <Box
             component="form"
             onSubmit={onSearchSubmit}
             sx={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "flex-start",
               bgcolor: "rgba(255,255,255,0.15)",
               borderRadius: 1,
               px: 1,
-              width: { xs: 200, sm: 300, md: 400 },
+              flex: 1,
+              maxWidth: 500,
+              minWidth: 200,
+              mx: { xs: 0, md: 4 },
             }}
           >
             <InputBase
@@ -205,36 +215,57 @@ export default function ResponsiveDrawer({ children }) {
             </IconButton>
           </Box>
 
-          <IconButton color="inherit" onClick={toggleMode}>
-            {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
-          </IconButton>
+          {/* Right: Theme Toggle + Home + Profile */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton
+              color="inherit"
+              onClick={toggleMode}
+              title="Toggle Theme"
+            >
+              {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
 
-          {user && (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <IconButton onClick={handleAvatarClick} sx={{ mr: 1 }}>
-                <Avatar src={user.avatar} />
-              </IconButton>
-              <Typography variant="body1" sx={{ mr: 1 }}>
-                {user.fullName}
-              </Typography>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleAvatarClose}
-              >
-                <MenuItem
-                  component={RouterLink}
-                  to={`/profile/${user.username}`}
-                  onClick={handleAvatarClose}
+            <IconButton
+              sx={{ mx: 5, p: 0 }}
+              color="inherit"
+              component={RouterLink}
+              to="/"
+              title="Home"
+            >
+              <HomeIcon />
+            </IconButton>
+
+            {user && (
+              <>
+                <IconButton sx={{ mx: 0, p: 0 }} onClick={handleAvatarClick}>
+                  <Avatar src={user.avatar} />
+                </IconButton>
+                <Typography
+                  variant="body2"
+                  color="inherit"
+                  sx={{ mr: 15, p: 0, fontWeight: 800 }}
                 >
-                  <PersonIcon sx={{ mr: 1 }} /> My Profile
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} /> Logout
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
+                  {user.username}
+                </Typography>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleAvatarClose}
+                >
+                  <MenuItem
+                    component={RouterLink}
+                    to={`/profile/${user.username}`}
+                    onClick={handleAvatarClose}
+                  >
+                    <PersonIcon sx={{ mr: 1 }} /> My Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <LogoutIcon sx={{ mr: 1 }} /> Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 

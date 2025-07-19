@@ -14,17 +14,19 @@ const navItems = [
   { text: "Dashboard", to: "/dashboard" },
   { text: "Chat", to: "/chat" },
   { text: "Payments", to: "/payments" },
-  { text: "Upload", to: "/upload" },
 ];
 
-export default function Drawer() {
+export default function Drawer({ drawerWidth }) {
   return (
     <MuiDrawer
       variant="permanent"
       sx={{
-        width: 240,
+        width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: "border-box" },
+        [`& .MuiDrawer-paper`]: {
+          width: drawerWidth,
+          boxSizing: "border-box",
+        },
       }}
     >
       <Toolbar />
