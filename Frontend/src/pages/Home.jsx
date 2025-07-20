@@ -87,7 +87,7 @@ export default function Home() {
       <Container
         maxWidth="xl"
         sx={{
-          mt: 4,
+          mt: 6,
           mb: 0,
           px: { xs: 2, sm: 3, md: 4 },
           pt: { xs: 2, sm: 4 },
@@ -175,7 +175,7 @@ export default function Home() {
           </Box>
         </motion.div>
 
-        <Divider sx={{ mb: 4 }} />
+        <Divider sx={{ mb: 5 }} />
 
         {/* Content Section */}
         <AnimatePresence mode="wait">

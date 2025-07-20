@@ -71,7 +71,7 @@ export default function Premium() {
   };
 
   return (
-    <Container sx={{ mt: 4, maxWidth: 600 }}>
+    <Container sx={{ mt: 10, maxWidth: 600 }}>
       {user?.isPremium && (
         <Alert severity="success" sx={{ mb: 3 }}>
           Premium active until{" "}

@@ -2,7 +2,7 @@ import React from "react";
 import { Container, Typography } from "@mui/material";
 export default function PrivacyPolicy() {
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 8 }}>
       <Typography variant="h4" gutterBottom>
         Privacy Policy
       </Typography>

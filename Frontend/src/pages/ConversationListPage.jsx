@@ -21,7 +21,7 @@ export default function ConversationListPage() {
     return <Typography>You have no conversations yet.</Typography>;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 10 }}>
       <Typography variant="h4" gutterBottom>
         Direct Messages
       </Typography>

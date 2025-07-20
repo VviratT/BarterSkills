@@ -34,7 +34,7 @@ export default function ConversationPage() {
   if (isLoading) return <Typography>Loading chat…</Typography>;
 
   return (
-    <Container sx={{ mt: 4 }}>
+    <Container sx={{ mt: 8 }}>
       <Typography variant="h4" gutterBottom>
         Conversation
       </Typography>
@@ -54,12 +54,15 @@ export default function ConversationPage() {
             />
             <Paper
               elevation={1}
-              sx={{
+              sx={(theme) => ({
                 p: 1.2,
-                backgroundColor: "#f5f5f5",
+                backgroundColor:
+                  theme.palette.mode === "light"
+                    ? theme.palette.grey[100]
+                    : theme.palette.grey[800],
                 borderRadius: 2,
                 maxWidth: "75%",
-              }}
+              })}
             >
               <Typography variant="subtitle2" color="primary">
                 {m.sender.fullName}

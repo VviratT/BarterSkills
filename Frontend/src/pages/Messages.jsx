@@ -42,7 +42,7 @@ export default function MessagesPage() {
 
   return (
     <Container>
-      <Typography variant="h4" mt={4}>
+      <Typography variant="h4" mt={8}>
         Global Chat
       </Typography>
       <Box mt={2}>
@@ -53,26 +53,38 @@ export default function MessagesPage() {
             alignItems="flex-start"
             gap={1}
             mb={2}
-            sx={{
-              backgroundColor: "#f5f5f5",
+            sx={(theme) => ({
+              // light: very light grey, dark: slightly elevated surface
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[100]
+                  : theme.palette.background.paper,
               borderRadius: 2,
               p: 1.5,
               maxWidth: "80%",
-            }}
+              // add a subtle box shadow in dark mode if you like:
+              ...(theme.palette.mode === "dark" && {
+                boxShadow: theme.shadows[1],
+              }),
+            })}
           >
             <Avatar src={msg.user?.avatar} sx={{ width: 32, height: 32 }} />
             <Box>
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="subtitle2" fontWeight={600}>
+                <Typography
+                  variant="subtitle2"
+                  fontWeight={600}
+                  color="text.primary"
+                >
                   {msg.user?.username || msg.sender.username}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {msg.user?.createdAt
-                    ? new Date(msg.user.createdAt).toLocaleTimeString()
-                    : new Date(msg.createdAt).toLocaleTimeString()}
+                  {new Date(
+                    msg.user?.createdAt || msg.createdAt
+                  ).toLocaleTimeString()}
                 </Typography>
               </Box>
-              <Typography variant="body2" mt={0.5}>
+              <Typography variant="body2" mt={0.5} color="text.primary">
                 {msg.text}
               </Typography>
             </Box>

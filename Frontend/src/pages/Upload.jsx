@@ -68,7 +68,7 @@ const Upload = () => {
   };
 
   return (
-    <Box p={4}>
+    <Box mt={6}  p={4}>
       <Typography variant="h4" gutterBottom>
         Upload Video
       </Typography>

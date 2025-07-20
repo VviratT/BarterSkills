@@ -1,5 +1,6 @@
 // src/components/ResponsiveDrawer.jsx
 import React, { useContext, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Drawer,
@@ -22,6 +23,7 @@ import {
   Tooltip,
   Fade,
   Button,
+  alpha,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -48,6 +50,8 @@ import { useThemeMode } from "../context/ThemeContext.jsx";
 const drawerWidth = 280;
 
 export default function ResponsiveDrawer({ children }) {
+  const theme = useTheme();  
+  const isDark = theme.palette.mode === "dark";
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
@@ -103,11 +107,11 @@ export default function ResponsiveDrawer({ children }) {
             }),
           width: `calc(100% - ${open ? drawerWidth : 0}px)`,
           ml: open ? `${drawerWidth}px` : 0,
-          background:
-            "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
-          backdropFilter: "blur(10px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+          backgroundColor: mode === "light" ? "#FFFFFF" : "#20043d",
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backdropFilter: isDark ? "none" : "blur(10px)",
           color: "text.primary",
+          pt: 0.5,
         }}
       >
         <Toolbar
@@ -127,7 +131,7 @@ export default function ResponsiveDrawer({ children }) {
                 edge="start"
                 sx={{
                   backgroundColor: "rgba(99, 102, 241, 0.1)",
-                  color: "primary.main",
+                  color: "text.primary",
                   "&:hover": {
                     backgroundColor: "rgba(99, 102, 241, 0.2)",
                   },
@@ -172,19 +176,30 @@ export default function ResponsiveDrawer({ children }) {
             <Box
               component="form"
               onSubmit={handleSearchSubmit}
-              sx={{
+              sx={(theme) => ({
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: "rgba(255, 255, 255, 0.8)",
+
+                // theme‑aware background:
+                backgroundColor:
+                  theme.palette.mode === "light"
+                    ? alpha(theme.palette.common.white, 0.8)
+                    : alpha(theme.palette.background.paper, 0.16),
+
                 borderRadius: 3,
                 px: 2,
                 py: 1,
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+
+                // use theme divider color
+                border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+
+                // use the theme's elevation‐1 shadow
+                boxShadow: theme.shadows[1],
+
                 "&:hover": {
-                  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                  boxShadow: theme.shadows[4],
                 },
-              }}
+              })}
             >
               <InputBase
                 placeholder="Search videos, creators..."
@@ -202,13 +217,19 @@ export default function ResponsiveDrawer({ children }) {
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                 <IconButton
                   type="submit"
-                  sx={{
-                    color: "primary.main",
-                    backgroundColor: "rgba(99, 102, 241, 0.1)",
+                  sx={(theme) => ({
+                    color: "text.primary",
+                    backgroundColor:
+                      theme.palette.mode === "light"
+                        ? alpha(theme.palette.primary.main, 0.1)
+                        : alpha(theme.palette.primary.main, 0.2),
                     "&:hover": {
-                      backgroundColor: "rgba(99, 102, 241, 0.2)",
+                      backgroundColor:
+                        theme.palette.mode === "light"
+                          ? alpha(theme.palette.primary.main, 0.2)
+                          : alpha(theme.palette.primary.main, 0.3),
                     },
-                  }}
+                  })}
                 >
                   <SearchIcon />
                 </IconButton>
@@ -227,7 +248,7 @@ export default function ResponsiveDrawer({ children }) {
                   onClick={toggleMode}
                   sx={{
                     backgroundColor: "rgba(99, 102, 241, 0.1)",
-                    color: "primary.main",
+                    color: "text.primary",
                     "&:hover": {
                       backgroundColor: "rgba(99, 102, 241, 0.2)",
                     },
@@ -246,7 +267,7 @@ export default function ResponsiveDrawer({ children }) {
                   to="/"
                   sx={{
                     backgroundColor: "rgba(99, 102, 241, 0.1)",
-                    color: "primary.main",
+                    color: "text.primary",
                     "&:hover": {
                       backgroundColor: "rgba(99, 102, 241, 0.2)",
                     },
@@ -316,15 +337,22 @@ export default function ResponsiveDrawer({ children }) {
                   TransitionComponent={Fade}
                   PaperProps={{
                     elevation: 8,
-                    sx: {
+                    sx: (theme) => ({
                       borderRadius: 2,
                       mt: 1,
                       minWidth: 200,
+                      // theme‑aware background:
                       background:
-                        "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
-                      backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(255, 255, 255, 0.2)",
-                    },
+                        theme.palette.mode === "light"
+                          ? "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.95) 100%)"
+                          : theme.palette.background.paper,
+                      backdropFilter:
+                        theme.palette.mode === "light" ? "blur(10px)" : "none",
+                      border:
+                        theme.palette.mode === "light"
+                          ? "1px solid rgba(255,255,255,0.2)"
+                          : `1px solid ${theme.palette.divider}`,
+                    }),
                   }}
                 >
                   <MenuItem
@@ -340,7 +368,7 @@ export default function ResponsiveDrawer({ children }) {
                       },
                     }}
                   >
-                    <PersonIcon sx={{ mr: 2, color: "primary.main" }} />
+                    <PersonIcon sx={{ mr: 2, color: "text.primary" }} />
                     My Profile
                   </MenuItem>
                   <MenuItem
@@ -356,7 +384,7 @@ export default function ResponsiveDrawer({ children }) {
                       },
                     }}
                   >
-                    <SettingsIcon sx={{ mr: 2, color: "primary.main" }} />
+                    <SettingsIcon sx={{ mr: 2, color: "text.primary" }} />
                     Settings
                   </MenuItem>
                   <Divider sx={{ my: 1 }} />
@@ -393,8 +421,8 @@ export default function ResponsiveDrawer({ children }) {
                       px: 2,
                       py: 1,
                       fontWeight: 600,
-                      borderColor: "primary.main",
-                      color: "primary.main",
+                      bordercolor: "text.primary",
+                      color: "text.primary",
                       "&:hover": {
                         backgroundColor: "rgba(99, 102, 241, 0.1)",
                         borderColor: "primary.dark",
@@ -445,11 +473,8 @@ export default function ResponsiveDrawer({ children }) {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
-            background:
-              "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
-            backdropFilter: "blur(10px)",
-            borderRight: "1px solid rgba(255, 255, 255, 0.2)",
-            boxShadow: "4px 0 20px rgba(0, 0, 0, 0.1)",
+            backgroundColor: theme.palette.background.paper,
+            borderRight: `1px solid ${theme.palette.divider}`,
           },
         }}
       >
@@ -654,21 +679,24 @@ export default function ResponsiveDrawer({ children }) {
       {/* Main Content */}
       <Box
         component="main"
-        sx={{
+        sx={(theme) => ({
           flexGrow: 1,
-          pt: 2,
-          transition: (theme) =>
-            theme.transitions.create("margin", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
-            }),
+          pt: 10,
           ml: open ? `${drawerWidth}px` : 0,
           minHeight: "100vh",
+
+          transition: theme.transitions.create(["margin"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
+
           background:
-            "linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.8) 100%)",
-        }}
+            theme.palette.mode === "light"
+              ? "linear-gradient(135deg, rgba(248,250,252,0.8) 0%, rgba(241,245,249,0.8) 100%)"
+              : theme.palette.background.default,
+        })}
       >
-        <Container maxWidth="xl" sx={{ py: 2 }}>
+        <Container maxWidth="xl" sx={{ py: 0 }}>
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
