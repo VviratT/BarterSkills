@@ -94,15 +94,23 @@ export default function Register() {
         >
           <Paper
             elevation={0}
-            sx={{
+            sx={(theme) => ({
               p: { xs: 3, sm: 4 },
               borderRadius: 3,
               background:
-                "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
+                theme.palette.mode === "light"
+                  ? "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)"
+                  : "linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(45, 45, 45, 0.9) 100%)",
               backdropFilter: "blur(10px)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-            }}
+              border:
+                theme.palette.mode === "light"
+                  ? "1px solid rgba(255, 255, 255, 0.2)"
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow:
+                theme.palette.mode === "light"
+                  ? "0 8px 32px rgba(0, 0, 0, 0.1)"
+                  : "0 8px 32px rgba(0, 0, 0, 0.5)",
+            })}
           >
             {/* Header */}
             <Box textAlign="center" mb={4}>
