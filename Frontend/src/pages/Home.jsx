@@ -81,10 +81,17 @@ export default function Home() {
   });
 
   return (
-    <Box sx={{ width: "100%", minHeight: "100vh" }}>
+    <Box
+      sx={{ width: "100%", minHeight: "100vh", bgcolor: "background.default" }}
+    >
       <Container
         maxWidth="xl"
-        sx={{ mt: 4, mb: 6, px: { xs: 2, sm: 3, md: 4 } }}
+        sx={{
+          mt: 4,
+          mb: 6,
+          px: { xs: 2, sm: 3, md: 4 },
+          pt: { xs: 2, sm: 4 },
+        }}
       >
         {/* Hero Section */}
         <motion.div
@@ -130,10 +137,12 @@ export default function Home() {
             <Box
               sx={{
                 display: "flex",
-                gap: 1,
+                gap: { xs: 0.5, sm: 1 },
                 flexWrap: "wrap",
                 justifyContent: "center",
                 alignItems: "center",
+                maxWidth: "800px",
+                mx: "auto",
               }}
             >
               {categories.map((cat) => (
@@ -178,22 +187,47 @@ export default function Home() {
             transition={{ duration: 0.3 }}
           >
             {isLoading ? (
-              <Grid container spacing={3} justifyContent="center">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={i}>
+              <Grid
+                container
+                spacing={3}
+                sx={{
+                  justifyContent: { xs: "center", sm: "flex-start" },
+                  alignItems: "stretch",
+                }}
+              >
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    key={i}
+                    sx={{
+                      display: "flex",
+                      minHeight: 400,
+                    }}
+                  >
                     <motion.div
                       variants={itemVariants}
                       initial="hidden"
                       animate="visible"
                       transition={{ delay: i * 0.1 }}
+                      style={{
+                        height: "100%",
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
                     >
                       <Skeleton
                         variant="rectangular"
                         height={200}
-                        sx={{ borderRadius: 2, mb: 1 }}
+                        sx={{ borderRadius: 2, mb: 2 }}
                       />
-                      <Skeleton width="80%" height={24} sx={{ mb: 1 }} />
-                      <Skeleton width="60%" height={20} />
+                      <Skeleton width="90%" height={24} sx={{ mb: 1 }} />
+                      <Skeleton width="70%" height={20} sx={{ mb: 1 }} />
+                      <Skeleton width="60%" height={16} />
                     </motion.div>
                   </Grid>
                 ))}
@@ -243,12 +277,34 @@ export default function Home() {
                 initial="hidden"
                 animate="visible"
               >
-                <Grid container spacing={3} justifyContent="center">
+                <Grid
+                  container
+                  spacing={3}
+                  sx={{
+                    justifyContent: { xs: "center", sm: "flex-start" },
+                    alignItems: "stretch",
+                  }}
+                >
                   {data.map((v, index) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={v._id}>
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      md={4}
+                      lg={3}
+                      key={v._id}
+                      sx={{
+                        display: "flex",
+                        minHeight: 400,
+                      }}
+                    >
                       <motion.div
                         variants={itemVariants}
-                        style={{ height: "100%" }}
+                        style={{
+                          height: "100%",
+                          width: "100%",
+                          display: "flex",
+                        }}
                       >
                         <VideoCard video={v} />
                       </motion.div>

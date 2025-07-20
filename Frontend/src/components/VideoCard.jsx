@@ -30,19 +30,23 @@ export default function VideoCard({ video }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -8 }}
-      style={{ height: "100%" }}
+      style={{ height: "100%", width: "100%" }}
     >
       <Card
         onClick={handleCardClick}
         sx={{
           cursor: "pointer",
           height: "100%",
+          width: "100%",
           display: "flex",
           flexDirection: "column",
           position: "relative",
           overflow: "hidden",
           "&:hover .play-overlay": {
             opacity: 1,
+          },
+          "&:hover .card-media": {
+            transform: "scale(1.05)",
           },
         }}
       >
@@ -55,8 +59,10 @@ export default function VideoCard({ video }) {
             sx={{
               objectFit: "cover",
               transition: "transform 0.3s ease-in-out",
+              aspectRatio: "16/9",
+              width: "100%",
             }}
-            className="card-media"
+            className="card-media video-thumbnail"
           />
 
           {/* Play Button Overlay */}
@@ -132,7 +138,7 @@ export default function VideoCard({ video }) {
           )}
         </Box>
 
-        <CardContent sx={{ flexGrow: 1, p: 2 }}>
+        <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, sm: 2 } }}>
           {/* Title */}
           <Typography
             variant="h6"
@@ -145,6 +151,8 @@ export default function VideoCard({ video }) {
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+              minHeight: { xs: "2.6rem", sm: "3.25rem" },
             }}
           >
             {video.title}
