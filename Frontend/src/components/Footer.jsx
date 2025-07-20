@@ -79,7 +79,7 @@ export default function Footer() {
         bgcolor: "background.paper",
         borderTop: "1px solid",
         borderColor: "divider",
-        mt: 8,
+        mt: 0,
         pt: 6,
         pb: 3,
       }}

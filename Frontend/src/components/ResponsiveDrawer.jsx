@@ -89,7 +89,7 @@ export default function ResponsiveDrawer({ children }) {
   ];
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <>
       {/* App Bar */}
       <AppBar
         position="fixed"
@@ -656,7 +656,7 @@ export default function ResponsiveDrawer({ children }) {
         component="main"
         sx={{
           flexGrow: 1,
-          pt: 10,
+          pt: 2,
           transition: (theme) =>
             theme.transitions.create("margin", {
               easing: theme.transitions.easing.sharp,
@@ -681,6 +681,6 @@ export default function ResponsiveDrawer({ children }) {
           </AnimatePresence>
         </Container>
       </Box>
-    </Box>
+    </>
   );
 }

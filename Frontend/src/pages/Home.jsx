@@ -88,7 +88,7 @@ export default function Home() {
         maxWidth="xl"
         sx={{
           mt: 4,
-          mb: 6,
+          mb: 0,
           px: { xs: 2, sm: 3, md: 4 },
           pt: { xs: 2, sm: 4 },
         }}
@@ -190,10 +190,8 @@ export default function Home() {
               <Grid
                 container
                 spacing={3}
-                sx={{
-                  justifyContent: { xs: "center", sm: "flex-start" },
-                  alignItems: "stretch",
-                }}
+                justifyContent="center"
+                alignItems="stretch"
               >
                 {Array.from({ length: 8 }).map((_, i) => (
                   <Grid
@@ -280,10 +278,9 @@ export default function Home() {
                 <Grid
                   container
                   spacing={3}
-                  sx={{
-                    justifyContent: { xs: "center", sm: "flex-start" },
-                    alignItems: "stretch",
-                  }}
+                  justifyContent="center"
+                  alignItems="stretch"
+                  pb={4}
                 >
                   {data.map((v, index) => (
                     <Grid
