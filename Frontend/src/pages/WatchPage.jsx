@@ -259,14 +259,20 @@ export default function WatchPage() {
               {/* Video Player */}
               <Paper
                 elevation={0}
-                sx={{
+                sx={(theme) => ({
                   borderRadius: 3,
                   overflow: "hidden",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  boxShadow:
+                    theme.palette.mode === "light"
+                      ? "0 8px 32px rgba(0, 0, 0, 0.1)"
+                      : "0 8px 32px rgba(0, 0, 0, 0.5)",
+                  border:
+                    theme.palette.mode === "light"
+                      ? "1px solid rgba(255, 255, 255, 0.2)"
+                      : "1px solid rgba(255, 255, 255, 0.1)",
                   mb: 3,
                   position: "relative",
-                }}
+                })}
               >
                 <Box
                   sx={{
@@ -348,15 +354,20 @@ export default function WatchPage() {
                 {/* Stats and Actions Bar */}
                 <Paper
                   elevation={0}
-                  sx={{
+                  sx={(theme) => ({
                     p: 3,
                     borderRadius: 3,
                     background:
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
+                      theme.palette.mode === "light"
+                        ? "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.95) 100%)"
+                        : "linear-gradient(135deg, rgba(38,38,38,0.9) 0%, rgba(25,25,25,0.95) 100%)",
                     backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    border:
+                      theme.palette.mode === "light"
+                        ? "1px solid rgba(255, 255, 255, 0.2)"
+                        : "1px solid rgba(255, 255, 255, 0.05)",
                     mb: 3,
-                  }}
+                  })}
                 >
                   <Stack direction="row" alignItems="center" spacing={2} mb={3}>
                     <Avatar
@@ -553,16 +564,21 @@ export default function WatchPage() {
                     >
                       <Paper
                         elevation={0}
-                        sx={{
+                        sx={(theme) => ({
                           p: 4,
                           textAlign: "center",
                           borderRadius: 3,
                           background:
-                            "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
+                            theme.palette.mode === "light"
+                              ? "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)"
+                              : "linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.95) 100%)",
                           backdropFilter: "blur(10px)",
-                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          border:
+                            theme.palette.mode === "light"
+                              ? "1px solid rgba(255, 255, 255, 0.2)"
+                              : "1px solid rgba(255, 255, 255, 0.1)",
                           mb: 4,
-                        }}
+                        })}
                       >
                         <SmartToy
                           sx={{ fontSize: 64, color: "primary.main", mb: 2 }}
@@ -617,15 +633,20 @@ export default function WatchPage() {
                     >
                       <Paper
                         elevation={0}
-                        sx={{
+                        sx={(theme) => ({
                           borderRadius: 3,
                           background:
-                            "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
+                            theme.palette.mode === "light"
+                              ? "linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95))"
+                              : "linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95))",
                           backdropFilter: "blur(10px)",
-                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          border:
+                            theme.palette.mode === "light"
+                              ? "1px solid rgba(255, 255, 255, 0.2)"
+                              : "1px solid rgba(255, 255, 255, 0.1)",
                           mb: 4,
                           overflow: "hidden",
-                        }}
+                        })}
                       >
                         <Box
                           sx={{
@@ -800,14 +821,19 @@ export default function WatchPage() {
                 {/* Comments Section */}
                 <Paper
                   elevation={0}
-                  sx={{
+                  sx={(theme) => ({
                     borderRadius: 3,
                     background:
-                      "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.95) 100%)",
+                      theme.palette.mode === "light"
+                        ? "linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95))"
+                        : "linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95))",
                     backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    border:
+                      theme.palette.mode === "light"
+                        ? "1px solid rgba(255, 255, 255, 0.2)"
+                        : "1px solid rgba(255, 255, 255, 0.1)",
                     mb: 4,
-                  }}
+                  })}
                 >
                   <Box sx={{ p: 3 }}>
                     <Typography variant="h6" fontWeight={600} mb={3}>
