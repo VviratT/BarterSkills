@@ -34,7 +34,7 @@ const socialLinks = [
   {
     icon: GitHub,
     label: "GitHub",
-    href: "https://github.com/your-repo",
+    href: "https://github.com/VviratT/BarterSkills",
     color: "#333",
   },
   {
@@ -46,7 +46,7 @@ const socialLinks = [
   {
     icon: LinkedIn,
     label: "LinkedIn",
-    href: "https://linkedin.com/company/barterskills",
+    href: "https://www.linkedin.com/in/dhananjay-borban-a18515250/",
     color: "#0077B5",
   },
   {
@@ -60,11 +60,15 @@ const socialLinks = [
 const contactInfo = [
   {
     icon: Email,
-    label: "hello@barterskills.com",
-    href: "mailto:hello@barterskills.com",
+    label: "borbanayush09@gmail.com",
+    href: "mailto:borbanayush09@gmail.com",
   },
-  { icon: Phone, label: "+1 (555) 123-4567", href: "tel:+15551234567" },
-  { icon: LocationOn, label: "San Francisco, CA", href: "#" },
+  { icon: Phone, label: "+91 9302720803", href: "tel:+919302720803" },
+  {
+    icon: LocationOn,
+    label: "MANIT Bhopal",
+    href: "https://share.google/wTJWy9tz3tWZGQo0T",
+  },
 ];
 
 export default function Footer() {
@@ -107,7 +111,7 @@ export default function Footer() {
               <Typography
                 variant="body1"
                 color="text.secondary"
-                sx={{ mb: 3, lineHeight: 1.6 }}
+                sx={{mr:10 ,mb: 3, lineHeight: 1.6 }}
               >
                 Empowering creators to share knowledge, build communities, and
                 monetize their expertise through innovative video content.
@@ -241,19 +245,6 @@ export default function Footer() {
           >
             <Chip
               label="Made with ❤️"
-              size="small"
-              variant="outlined"
-              sx={{
-                borderColor: "rgba(99, 102, 241, 0.3)",
-                color: "primary.main",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  backgroundColor: "rgba(99, 102, 241, 0.1)",
-                },
-              }}
-            />
-            <Chip
-              label="React + MUI"
               size="small"
               variant="outlined"
               sx={{
