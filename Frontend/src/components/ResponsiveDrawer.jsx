@@ -1,3 +1,4 @@
+// src/components/ResponsiveDrawer.jsx
 import React, { useContext, useState } from "react";
 import {
   Box,
@@ -15,6 +16,7 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Container,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -35,20 +37,18 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext.jsx";
 import { useThemeMode } from "../context/ThemeContext.jsx";
 
-
 const drawerWidth = 240;
 
 export default function ResponsiveDrawer({ children }) {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
   const { mode, toggleMode } = useThemeMode();
-  
+
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const toggleDrawer = () => setOpen(!open);
-
+  const toggleDrawer = () => setOpen((v) => !v);
   const onSearchSubmit = (e) => {
     e.preventDefault();
     const term = q.trim();
@@ -57,7 +57,6 @@ export default function ResponsiveDrawer({ children }) {
       setQ("");
     }
   };
-
   const handleAvatarClick = (e) => setAnchorEl(e.currentTarget);
   const handleAvatarClose = () => setAnchorEl(null);
   const handleLogout = async () => {
@@ -66,99 +65,21 @@ export default function ResponsiveDrawer({ children }) {
     navigate("/login");
   };
 
-  const drawer = (
-    <Box sx={{ width: drawerWidth }}>
-      <Toolbar
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6">BarterSkills</Typography>
-        <IconButton onClick={toggleDrawer}>
-          <ChevronLeftIcon />
-        </IconButton>
-      </Toolbar>
-      <Divider />
-
-      <List>
-        <ListItemButton component={RouterLink} to="/premium">
-          <ListItemIcon>
-            <StarIcon />
-          </ListItemIcon>
-          <ListItemText primary="Go Premium" />
-        </ListItemButton>
-
-        <ListItemButton component={RouterLink} to="/">
-          <ListItemIcon>
-            <HomeIcon />
-          </ListItemIcon>
-          <ListItemText primary="Home" />
-        </ListItemButton>
-        <ListItemButton component={RouterLink} to="/dashboard">
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItemButton>
-        <ListItemButton component={RouterLink} to="/upload">
-          <ListItemIcon>
-            <UploadIcon />
-          </ListItemIcon>
-          <ListItemText primary="Upload" />
-        </ListItemButton>
-        <Divider sx={{ my: 1 }} />
-        <ListItemButton component={RouterLink} to="/messages">
-          <ListItemIcon>
-            <ChatIcon />
-          </ListItemIcon>
-          <ListItemText primary="Global Chat" />
-        </ListItemButton>
-        <ListItemButton component={RouterLink} to="/conversations">
-          <ListItemIcon>
-            <MessageIcon />
-          </ListItemIcon>
-          <ListItemText primary="Direct Messages" />
-        </ListItemButton>
-        <Divider sx={{ my: 1 }} />
-        {user && (
-          <>
-            <ListItemButton
-              component={RouterLink}
-              to={`/profile/${user.username}`}
-            >
-              <ListItemIcon>
-                <Avatar src={user.avatar} sx={{ width: 24, height: 24 }} />
-              </ListItemIcon>
-              <ListItemText primary="My Profile" />
-            </ListItemButton>
-
-            <ListItemButton onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItemButton>
-          </>
-        )}
-      </List>
-    </Box>
-  );
-
   return (
     <Box sx={{ display: "flex" }}>
-      {/* AppBar */}
+      {/* APP BAR */}
       <AppBar
         position="fixed"
         sx={{
-          width: `calc(100% - ${open ? drawerWidth : 0}px)`,
-          ml: `${open ? drawerWidth : 0}px`,
-          transition: (theme) =>
-            theme.transitions.create(["width", "margin"], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
+          zIndex: (t) => t.zIndex.drawer + 1,
+          transition: (t) =>
+            t.transitions.create(["width", "margin"], {
+              easing: t.transitions.easing.sharp,
+              duration: t.transitions.duration.leavingScreen,
             }),
+          width: `calc(100% - ${open ? drawerWidth : 0}px)`,
+          ml: open ? `${drawerWidth}px` : 0,
+          backgroundColor: "primary.main",
         }}
       >
         <Toolbar
@@ -166,67 +87,68 @@ export default function ResponsiveDrawer({ children }) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            gap: 2,
-            flexWrap: "wrap",
             px: { xs: 1, sm: 2 },
           }}
         >
-          {/* Left: Menu + Logo */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconButton color="inherit" edge="start" onClick={toggleDrawer}>
-              <MenuIcon />
+          {/* Left: Drawer Toggle + Logo */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton color="inherit" onClick={toggleDrawer} edge="start">
+              {open ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
             <Typography
               variant="h6"
               component={RouterLink}
               to="/"
-              color="inherit"
-              sx={{ textDecoration: "none" }}
+              sx={{
+                color: "inherit",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
             >
               BarterSkills
             </Typography>
           </Box>
 
-          {/* Center-Left: Search Bar */}
+          {/* Center: Search Bar */}
           <Box
             component="form"
             onSubmit={onSearchSubmit}
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-start",
-              bgcolor: "rgba(255,255,255,0.15)",
-              borderRadius: 1,
+              backgroundColor: "rgba(255,255,255,0.2)",
+              borderRadius: 2,
               px: 1,
-              flex: 1,
-              maxWidth: 500,
-              minWidth: 200,
-              mx: { xs: 0, md: 4 },
+              mx: "auto",
+              width: {
+                xs: open ? "60%" : "50%",
+                sm: open ? "45%" : "35%",
+                md: open ? "40%" : "30%",
+              },
+              transition: (t) =>
+                t.transitions.create("width", {
+                  easing: t.transitions.easing.sharp,
+                  duration: t.transitions.duration.shorter,
+                }),
             }}
           >
             <InputBase
               placeholder="Search…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              sx={{ color: "inherit", flexGrow: 1 }}
+              sx={{ flex: 1, color: "inherit", pl: 1 }}
             />
-            <IconButton type="submit" color="inherit">
+            <IconButton type="submit" color="inherit" sx={{ p: 1 }}>
               <SearchIcon />
             </IconButton>
           </Box>
 
-          {/* Right: Theme Toggle + Home + Profile */}
+          {/* Right: Actions */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <IconButton
-              color="inherit"
-              onClick={toggleMode}
-              title="Toggle Theme"
-            >
+            <IconButton color="inherit" onClick={toggleMode}>
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </IconButton>
-
             <IconButton
-              sx={{ mx: 5, p: 0 }}
               color="inherit"
               component={RouterLink}
               to="/"
@@ -234,19 +156,17 @@ export default function ResponsiveDrawer({ children }) {
             >
               <HomeIcon />
             </IconButton>
-
             {user && (
               <>
-                <IconButton sx={{ mx: 0, p: 0 }} onClick={handleAvatarClick}>
-                  <Avatar src={user.avatar} />
-                </IconButton>
                 <Typography
                   variant="body2"
-                  color="inherit"
-                  sx={{ mr: 15, p: 0, fontWeight: 800 }}
+                  sx={{ color: "inherit", fontWeight: 500 }}
                 >
                   {user.username}
                 </Typography>
+                <IconButton onClick={handleAvatarClick} sx={{ p: 0 }}>
+                  <Avatar src={user.avatar} sx={{ width: 32, height: 32 }} />
+                </IconButton>
                 <Menu
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
@@ -257,10 +177,12 @@ export default function ResponsiveDrawer({ children }) {
                     to={`/profile/${user.username}`}
                     onClick={handleAvatarClose}
                   >
-                    <PersonIcon sx={{ mr: 1 }} /> My Profile
+                    <PersonIcon sx={{ mr: 1 }} />
+                    My Profile
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
-                    <LogoutIcon sx={{ mr: 1 }} /> Logout
+                    <LogoutIcon sx={{ mr: 1 }} />
+                    Logout
                   </MenuItem>
                 </Menu>
               </>
@@ -269,36 +191,73 @@ export default function ResponsiveDrawer({ children }) {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer */}
+      {/* DRAWER */}
       <Drawer
         variant="persistent"
         open={open}
         sx={{
+          width: drawerWidth,
+          flexShrink: 0,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
           },
         }}
       >
-        {drawer}
+        <Toolbar />
+        <Divider />
+        <List>
+          {[
+            ["/premium", <StarIcon />, "Go Premium"],
+            ["/", <HomeIcon />, "Home"],
+            ["/dashboard", <DashboardIcon />, "Dashboard"],
+            ["/upload", <UploadIcon />, "Upload"],
+            ["/messages", <ChatIcon />, "Global Chat"],
+            ["/conversations", <MessageIcon />, "Direct Messages"],
+          ].map(([to, Icon, text]) => (
+            <ListItemButton key={text} component={RouterLink} to={to}>
+              <ListItemIcon>{Icon}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          ))}
+          <Divider sx={{ my: 1 }} />
+          {user && (
+            <>
+              <ListItemButton
+                component={RouterLink}
+                to={`/profile/${user.username}`}
+              >
+                <ListItemIcon>
+                  <Avatar src={user.avatar} sx={{ width: 24, height: 24 }} />
+                </ListItemIcon>
+                <ListItemText primary="My Profile" />
+              </ListItemButton>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </>
+          )}
+        </List>
       </Drawer>
 
-      {/* Main content */}
+      {/* MAIN CONTENT */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          transition: (theme) =>
-            theme.transitions.create("margin", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.leavingScreen,
+          pt: 10, // push below AppBar
+          transition: (t) =>
+            t.transitions.create("margin", {
+              easing: t.transitions.easing.sharp,
+              duration: t.transitions.duration.leavingScreen,
             }),
-          ml: `${open ? 0 : `-${drawerWidth}px`}`,
+          ml: open ? `${drawerWidth}px` : 0,
         }}
       >
-        <Toolbar />
-        {children}
+        <Container maxWidth="lg">{children}</Container>
       </Box>
     </Box>
   );

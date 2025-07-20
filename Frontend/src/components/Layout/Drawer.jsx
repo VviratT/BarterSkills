@@ -3,27 +3,28 @@ import {
   Drawer as MuiDrawer,
   Toolbar,
   List,
-  ListItem,
+  ListItemButton,
   ListItemText,
 } from "@mui/material";
-import { Link } from "react-router-dom";
-
-const navItems = [
-  { text: "Home", to: "/" },
-  { text: "Upload", to: "/upload" },
-  { text: "Dashboard", to: "/dashboard" },
-  { text: "Chat", to: "/chat" },
-  { text: "Payments", to: "/payments" },
-];
+import { Link, useLocation } from "react-router-dom";
 
 export default function Drawer({ drawerWidth }) {
+  const location = useLocation();
+  const navItems = [
+    { text: "Home", to: "/" },
+    { text: "Upload", to: "/upload" },
+    { text: "Dashboard", to: "/dashboard" },
+    { text: "Chat", to: "/chat" },
+    { text: "Payments", to: "/payments" },
+  ];
+
   return (
     <MuiDrawer
       variant="permanent"
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        [`& .MuiDrawer-paper`]: {
+        "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
         },
@@ -32,9 +33,14 @@ export default function Drawer({ drawerWidth }) {
       <Toolbar />
       <List>
         {navItems.map((item) => (
-          <ListItem button key={item.to} component={Link} to={item.to}>
+          <ListItemButton
+            key={item.to}
+            component={Link}
+            to={item.to}
+            selected={location.pathname === item.to}
+          >
             <ListItemText primary={item.text} />
-          </ListItem>
+          </ListItemButton>
         ))}
       </List>
     </MuiDrawer>

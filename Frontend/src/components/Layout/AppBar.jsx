@@ -14,7 +14,11 @@ export default function AppBar({ drawerWidth }) {
   return (
     <MuiAppBar
       position="fixed"
-      sx={{ width: `calc(100% - ${drawerWidth}px)`, ml: `${drawerWidth}px` }}
+      sx={{
+        width: `calc(100% - ${drawerWidth}px)`,
+        ml: `${drawerWidth}px`,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+      }}
     >
       <Toolbar>
         <Typography
@@ -25,7 +29,6 @@ export default function AppBar({ drawerWidth }) {
         >
           VideoAI Pro
         </Typography>
-
         {user ? (
           <Button color="inherit" onClick={logout}>
             Logout

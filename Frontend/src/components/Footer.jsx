@@ -1,32 +1,57 @@
+// src/components/layout/Footer.jsx
 import React from "react";
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Typography, Link, Divider, Stack } from "@mui/material";
+
+const footerLinks = [
+  { label: "Privacy Policy", to: "/privacy-policy" },
+  { label: "Terms & Conditions", to: "/terms-and-conditions" },
+  { label: "Cancellation & Refund", to: "/cancellation-refund" },
+  { label: "Shipping & Delivery", to: "/shipping-delivery" },
+  { label: "Contact Us", to: "/contact-us" },
+];
 
 export default function Footer() {
   return (
     <Box
-      sx={{ textAlign: "center", py: 2 }}
       component="footer"
-      py={3}
-      textAlign="center"
-      bgcolor="background.paper"
+      sx={{
+        bgcolor: "background.paper",
+        borderTop: 1,
+        borderColor: "divider",
+        mt: 4,
+        py: 3,
+      }}
     >
-      <Typography variant="body2" color="text.secondary">
-        © {new Date().getFullYear()} BarterSkills. All rights reserved.
-        <Link href="https://github.com/your-repo" ml={1}>
+      <Divider />
+      <Stack
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        spacing={2}
+        flexWrap="wrap"
+        sx={{ mt: 2 }}
+      >
+        {footerLinks.map(({ label, to }) => (
+          <Link key={to} href={to} variant="body2" color="text.secondary">
+            {label}
+          </Link>
+        ))}
+        <Link
+          href="https://github.com/your-repo"
+          variant="body2"
+          color="text.secondary"
+        >
           GitHub
         </Link>
+      </Stack>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        align="center"
+        sx={{ mt: 1 }}
+      >
+        © {new Date().getFullYear()} BarterSkills. All rights reserved.
       </Typography>
-      {[
-        ["Privacy Policy", "/privacy-policy"],
-        ["Terms & Conditions", "/terms-and-conditions"],
-        ["Cancellation & Refund", "/cancellation-refund"],
-        ["Shipping & Delivery", "/shipping-delivery"],
-        ["Contact Us", "/contact-us"],
-      ].map(([label, to]) => (
-        <Link key={to} href={to} sx={{ mx: 1 }}>
-          {label}
-        </Link>
-      ))}
     </Box>
   );
 }

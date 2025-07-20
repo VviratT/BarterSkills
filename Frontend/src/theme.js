@@ -50,7 +50,24 @@ const theme = createTheme({
         },
       },
     },
-    // add overrides for other MUI components as we build…
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: palette.background.paper,
+          color: palette.text.primary,
+          boxShadow: "none",
+          borderBottom: "1px solid #ddd",
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#F9FAFC",
+          borderRight: "1px solid #ddd",
+        },
+      },
+    },
   },
 });
 
