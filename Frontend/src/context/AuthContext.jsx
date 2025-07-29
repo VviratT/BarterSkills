@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
     })();
   }, []);
 
-  // 🔄 Fetch user details (public method)
+  // Fetch user details (public method)
   const refreshUser = async () => {
     try {
       const res = await api.get("/users/current-user");
