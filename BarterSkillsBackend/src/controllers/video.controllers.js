@@ -17,32 +17,56 @@ import { View  } from "../models/view.model.js";
 
 export const getSingleVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  if (!mongoose.isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
+  const { watchIntent } = req.query; 
 
-  const video = await Video.findById(videoId).populate("owner", "fullName avatarUrl username");
-  if (!video) throw new ApiError(404, "Video not found");
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
 
-  // — Likes
+  const video = await Video.findById(videoId).populate(
+    "owner",
+    "fullName avatarUrl username"
+  );
+
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
   const likeCount = await Like.countDocuments({ video: video._id });
-  const isLiked   = req.user
+  const isLiked = req.user
     ? Boolean(await Like.exists({ video: video._id, likedBy: req.user._id }))
     : false;
 
-  // — Credits
   let remainingCredits = null;
-  if (req.user) {
-    // always reflect their current credits
-    // deduct only on first view of a free video
-    if (!video.isPremium) {
-      const firstView = !await View.exists({ video: video._id, viewer: req.user._id });
-      if (firstView && req.user.credits > 0) {
-        req.user.credits -= 1;
-        await req.user.save();
+  let shouldIncreaseView = false;
+
+  if (watchIntent === "true") {
+    if (req.user) {
+      remainingCredits = req.user.credits;
+
+      const firstView = !(await View.exists({
+        video: video._id,
+        viewer: req.user._id,
+      }));
+
+      if (firstView) {
+        if (!video.isPremium && req.user.credits > 0) {
+          req.user.credits -= 1;
+          await req.user.save();
+          remainingCredits = req.user.credits;
+        }
+
         await View.create({ video: video._id, viewer: req.user._id });
+        shouldIncreaseView = true;
       }
+    } else {
+      shouldIncreaseView = true;
     }
-    // *always* send back their up‑to‑date credits
-    remainingCredits = req.user.credits;
+  }
+
+  if (shouldIncreaseView) {
+    video.views = (video.views || 0) + 1;
+    await video.save();
   }
 
   return res.status(200).json({
@@ -52,10 +76,12 @@ export const getSingleVideo = asyncHandler(async (req, res) => {
       ...video.toObject(),
       likeCount,
       isLiked,
-      remainingCredits,    // now *always* a number for logged‑in users
+      remainingCredits,
     },
   });
 });
+
+
 
 
 
@@ -127,12 +153,24 @@ const getVideoAI = asyncHandler(async (req, res) => {
     .sort({ [sortField]: sortOrder })
     .skip(skip)
     .limit(limit)
-    .populate("owner", "fullName avatarUrl");
-  res.json(new ApiResponse(200, videos, "Videos fetched successfully"));
+    .populate("owner", "fullName avatarUrl username");
+
+  const video = await Promise.all(
+    videos.map(async (vid) => {
+      const likeCount = await Like.countDocuments({ video: vid._id });
+      return {
+        ...vid.toObject(),
+        likeCount,
+      };
+    })
+  );
+
+  res.json(new ApiResponse(200, video, "Videos fetched successfully"));
 });
 
+
 /**
- * Get duration of a video file.
+ * Get duration of a video file (rounded to 2 decimal places).
  * @param {string} absPath - absolute path from multer (videoFile.path)
  * @returns {Promise<number>}
  */
@@ -146,10 +184,13 @@ const getVideoDuration = (absPath) => {
       if (err) return reject(err);
       const duration = metadata?.format?.duration;
       if (!duration) return reject(new Error("No duration in metadata"));
-      resolve(duration);
+
+      const rounded = Number(duration.toFixed(2));
+      resolve(rounded);
     });
   });
 };
+
 
 const publishAVideo = asyncHandler(async (req, res) => {
   

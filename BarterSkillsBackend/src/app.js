@@ -64,7 +64,6 @@ app.use("/api/v1/messages", messageRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 
 schedulePremiumExpiryJob();
-// http://localhost:8000/api/v1/users/register
 
 app.use((err, _req, res, _next) => {
   console.error(" Error caught:", err);

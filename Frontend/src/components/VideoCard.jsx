@@ -21,7 +21,7 @@ export default function VideoCard({ video }) {
   const nav = useNavigate();
 
   const handleCardClick = () => {
-    nav(`/watch/${video._id}`);
+    nav(`/watch/${video._id}?watchIntent=true`);
   };
 
   return (
@@ -133,7 +133,12 @@ export default function VideoCard({ video }) {
                 fontWeight: 500,
               }}
             >
-              {video.duration}
+              {(() => {
+                const totalSeconds = Math.round(video.duration); 
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+              })()}
             </Box>
           )}
         </Box>

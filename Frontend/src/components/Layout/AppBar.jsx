@@ -27,7 +27,7 @@ export default function AppBar({ drawerWidth }) {
           to="/"
           sx={{ flexGrow: 1, color: "inherit", textDecoration: "none" }}
         >
-          VideoAI Pro
+          BarterSkills
         </Typography>
         {user ? (
           <Button color="inherit" onClick={logout}>
