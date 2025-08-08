@@ -1,4 +1,3 @@
-// src/components/GoogleLoginButton.jsx
 import React from "react";
 import { Button } from "@mui/material";
 

@@ -1,4 +1,3 @@
-// src/components/SubscribeButton.jsx
 import React from "react";
 import { Button, Skeleton } from "@mui/material";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
