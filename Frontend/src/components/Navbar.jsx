@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import React, { useContext } from "react";
 import {
   AppBar,

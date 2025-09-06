@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import api from "../api/api.js"; // your axios instance
+import api from "../api/api.js"; 
 import useAuth from "./useAuth.js";
 
 export default function OAuthHandler() {
