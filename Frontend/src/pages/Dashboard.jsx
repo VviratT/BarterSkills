@@ -27,6 +27,8 @@ import {
   PlayArrow,
   CalendarToday,
   ThumbUp,
+  Money,
+  Diamond,
 } from "@mui/icons-material";
 
 const statCards = [
@@ -47,6 +49,12 @@ const statCards = [
     label: "Subscribers",
     color: "#F59E0B",
     bgColor: "rgba(245, 158, 11, 0.1)",
+  },
+  {
+    icon: Diamond,
+    label: "User Credits",
+    color: "#1604D1",
+    bgColor: "rgba(34, 11, 245, 0.1)",
   },
 ];
 
@@ -153,6 +161,11 @@ export default function Dashboard() {
                   label: "Subscribers",
                   value: stats.subscribersCount ?? 0,
                   ...statCards[2],
+                },
+                {
+                  label: "User Credits",
+                  value: user.credits ?? 0,
+                  ...statCards[3],
                 },
               ].map((stat, index) => (
                 <Grid item xs={12} sm={6} md={4} key={stat.label}>
